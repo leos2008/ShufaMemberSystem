@@ -1322,15 +1322,18 @@ function renderAttendance() {
         }
         
         // 生成当月考勤日期标签
+        // 先按日期排序
+        const sortedRecords = [...currentMonthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
         // 创建日期到颜色的映射，确保相同日期颜色一致
         const dateColorMap = {};
-        currentMonthRecords.forEach((record, index) => {
+        sortedRecords.forEach((record, index) => {
             if (!dateColorMap[record.date]) {
                 dateColorMap[record.date] = colorPool[Object.keys(dateColorMap).length % colorPool.length];
             }
         });
         
-        const dateTags = currentMonthRecords.map((record, index) => {
+        const dateTags = sortedRecords.map((record, index) => {
             const color = dateColorMap[record.date];
             const recordDate = new Date(record.date);
             const yearMonthDay = recordDate.getFullYear() + '年' + 
@@ -1449,17 +1452,36 @@ function filterAttendance() {
             });
         }
         
-        const dateTags = currentMonthRecords.map((record, index) => {
-            const color = colorPool[index % colorPool.length];
+        // 生成当月考勤日期标签
+        // 先按日期排序
+        const sortedRecords = [...currentMonthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // 创建日期到颜色的映射，确保相同日期颜色一致
+        const dateColorMap = {};
+        sortedRecords.forEach((record, index) => {
+            if (!dateColorMap[record.date]) {
+                dateColorMap[record.date] = colorPool[Object.keys(dateColorMap).length % colorPool.length];
+            }
+        });
+        
+        const dateTags = sortedRecords.map((record, index) => {
+            const color = dateColorMap[record.date];
             const recordDate = new Date(record.date);
-            const fullDate = recordDate.toLocaleDateString('zh-CN');
-            const monthDay = String(recordDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                            String(recordDate.getDate()).padStart(2, '0');
+            const yearMonthDay = recordDate.getFullYear() + '年' + 
+                                String(recordDate.getMonth() + 1).padStart(2, '0') + '月' +
+                                String(recordDate.getDate()).padStart(2, '0') + '日';
+            const monthDay = (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
+            
+            // 构建 tooltip 内容
+            let tooltipContent = yearMonthDay;
+            if (record.remark) {
+                tooltipContent += '，' + record.remark;
+            }
             
             return `
                 <span class="tag tooltip" 
                       style="background: ${color}" 
-                      data-tooltip="${fullDate}"
+                      data-tooltip="${tooltipContent}"
                       onclick="removeAttendanceRecord(${record.id}, '${student.name}')">
                     ${monthDay}
                     <span class="tag-delete">×</span>
@@ -1469,9 +1491,12 @@ function filterAttendance() {
         
         // 生成最近 4 个月考勤展示
         const last4MonthsDisplay = last4Months.map(m => {
-            return `<div style="text-align: center; padding: 4px 8px; background: var(--hover-bg); border-radius: 4px; margin: 2px 0;">
+            return `<div style="text-align: center; padding: 8px 12px; background: var(--hover-bg); border-radius: 8px; margin: 2px; cursor: pointer; transition: all 0.2s;" 
+                        onclick="event.stopPropagation(); showMonthAttendanceDetail('${student.name}', ${m.year}, ${m.month})"
+                        onmouseover="this.style.background='var(--primary-color)'; this.style.color='white';"
+                        onmouseout="this.style.background='var(--hover-bg)'; this.style.color='';">
                 <div style="font-size: 12px; color: var(--text-secondary);">${m.year}年${m.month}月</div>
-                <div style="font-weight: 600; color: var(--primary-color);">${m.count}次</div>
+                <div style="font-weight: 600; color: var(--primary-color); font-size: 14px;">${m.count}次</div>
             </div>`;
         }).join('');
         
