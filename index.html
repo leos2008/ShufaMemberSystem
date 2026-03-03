@@ -388,6 +388,7 @@
             <button class="nav-tab" data-module="student">学员管理</button>
             <button class="nav-tab" data-module="attendance">考勤扣课</button>
             <button class="nav-tab" data-module="backup">数据备份</button>
+            <button class="nav-tab" data-module="settlement">月度结算</button>
         </div>
 
         <!-- 课包管理模块 -->
@@ -547,6 +548,50 @@
                     </tr>
                 </thead>
                 <tbody id="attendance-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 月度结算模块 -->
+        <div id="settlement-module" class="module">
+            <div class="module-header">
+                <h2>月度结算</h2>
+            </div>
+            <div class="action-bar">
+                <div class="search-group">
+                    <select id="settlement-filter-class">
+                        <option value="">全部班级</option>
+                    </select>
+                    <input type="month" id="settlement-month">
+                    <button class="btn btn-info" onclick="calculateSettlement()">计算结算</button>
+                </div>
+            </div>
+            <div class="stats-info" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">结算月份</div>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--primary-color);" id="settlement-month-display">-</div>
+                </div>
+                <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">结算学员数</div>
+                    <div style="font-size: 24px; font-weight: 600; color: #10b981;" id="settlement-student-count">0</div>
+                </div>
+                <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">消课总费用</div>
+                    <div style="font-size: 24px; font-weight: 600; color: #ef4444;" id="settlement-total-amount">¥0</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('settlement-table-body', 0, 'number')">学员编号 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('settlement-table-body', 1, 'string')">姓名 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('settlement-table-body', 2, 'number')">总课时 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('settlement-table-body', 3, 'number')">上月消耗课时 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('settlement-table-body', 4, 'number')">上月消耗课时费用 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('settlement-table-body', 5, 'number')">剩余课时 <span class="sort-icon">⇅</span></th>
+                    </tr>
+                </thead>
+                <tbody id="settlement-table-body">
                 </tbody>
             </table>
         </div>

@@ -99,6 +99,12 @@ function initTabs() {
             const moduleId = this.dataset.module + '-module';
             document.getElementById(moduleId).classList.add('active');
             
+            // 切换到月度结算模块时初始化
+            if (this.dataset.module === 'settlement') {
+                initSettlementModule();
+                calculateSettlement();
+            }
+            
             renderAllTables();
         });
     });
@@ -1826,6 +1832,156 @@ function importData(input) {
         }
     };
     reader.readAsText(file);
+}
+
+// ==================== 月度结算模块 ====================
+function calculateSettlement() {
+    const monthStr = document.getElementById('settlement-month').value;
+    if (!monthStr) {
+        showNotification('请选择结算月份', 'error');
+        return;
+    }
+    
+    const [year, month] = monthStr.split('-').map(Number);
+    
+    // 计算上一个月
+    let prevMonth = month - 1;
+    let prevYear = year;
+    if (prevMonth <= 0) {
+        prevMonth = 12;
+        prevYear = year - 1;
+    }
+    
+    const tbody = document.getElementById('settlement-table-body');
+    tbody.innerHTML = '';
+    
+    let totalAmount = 0;
+    let studentCount = 0;
+    
+    // Debug: console.log all recharges for debugging
+    console.log('=== 结算调试信息 ===');
+    console.log('结算月份:', prevYear, '年', prevMonth, '月');
+    console.log('学员数量:', data.students.length);
+    console.log('充值记录数量:', data.recharges.length);
+    console.log('考勤记录数量:', data.attendance.length);
+    
+    // Show message if no data
+    if (data.students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999; padding: 20px;">暂无学员数据，请先在学员管理或续费充值模块添加数据</td></tr>';
+        document.getElementById('settlement-month-display').textContent = `${prevYear}年${prevMonth}月`;
+        document.getElementById('settlement-student-count').textContent = '0';
+        document.getElementById('settlement-total-amount').textContent = '¥0';
+        return;
+    }
+    
+    data.students.forEach((student, index) => {
+        // 获取上月的考勤记录
+        const prevMonthRecords = data.attendance.filter(a => {
+            const recordDate = new Date(a.date);
+            return a.studentName === student.name && 
+                   recordDate.getFullYear() === prevYear && 
+                   recordDate.getMonth() + 1 === prevMonth;
+        });
+        
+        const consumedCount = prevMonthRecords.length;
+        
+        // 计算消课费用 - 先充先消逻辑
+        const cost = calculateConsumptionCost(student.name, prevYear, prevMonth, consumedCount);
+        
+        totalAmount += cost;
+        studentCount++;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${student.name}</td>
+            <td>${student.totalCount || 0}</td>
+            <td>${consumedCount}</td>
+            <td style="font-weight: 600; color: #ef4444;">¥${cost.toFixed(2)}</td>
+            <td style="font-weight: 600; color: ${getRemainingColor((student.remainingCount || 0) / (student.totalCount || 1))};">${student.remainingCount || 0}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    // 更新统计信息
+    document.getElementById('settlement-month-display').textContent = `${prevYear}年${prevMonth}月`;
+    document.getElementById('settlement-student-count').textContent = studentCount;
+    document.getElementById('settlement-total-amount').textContent = `¥${totalAmount.toFixed(2)}`;
+}
+
+function calculateConsumptionCost(studentName, year, month, consumedCount) {
+    if (consumedCount <= 0) return 0;
+    
+    // Get all recharge records for this student, sorted by date
+    const recharges = data.recharges
+        .filter(r => r.studentName === studentName)
+        .sort((a, b) => {
+            const dateStrA = a.date + ' ' + (a.time || '00:00:00');
+            const dateStrB = b.date + ' ' + (b.time || '00:00:00');
+            const dateA = new Date(dateStrA);
+            const dateB = new Date(dateStrB);
+            return dateA - dateB;
+        });
+    
+    if (recharges.length === 0) return 0;
+    
+    // Build a list of all classes with their unit prices
+    let availableClasses = [];
+    recharges.forEach(r => {
+        const unitPrice = r.count > 0 && r.totalAmount ? r.totalAmount / r.count : 0;
+        const dateStr = r.date + ' ' + (r.time || '00:00:00');
+        for (let i = 0; i < r.count; i++) {
+            availableClasses.push({
+                unitPrice: unitPrice,
+                date: dateStr
+            });
+        }
+    });
+    
+    // Sort by date (oldest first) - FIFO
+    availableClasses.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Get attendance records for the target month
+    const monthRecords = data.attendance.filter(a => {
+        const recordDate = new Date(a.date);
+        return a.studentName === studentName && 
+               recordDate.getFullYear() === year && 
+               recordDate.getMonth() + 1 === month;
+    });
+    
+    // Calculate cost - consume from oldest classes first
+    let totalCost = 0;
+    for (let i = 0; i < monthRecords.length && i < availableClasses.length; i++) {
+        totalCost += availableClasses[i].unitPrice;
+    }
+    
+    return totalCost;
+}
+
+// 初始化月度结算模块
+function initSettlementModule() {
+    // 填充班级选择框
+    const select = document.getElementById('settlement-filter-class');
+    if (select) {
+        select.innerHTML = '<option value="">全部班级</option>';
+        data.classes.forEach(cls => {
+            const option = document.createElement('option');
+            option.value = cls.name;
+            option.textContent = cls.name;
+            select.appendChild(option);
+        });
+    }
+    
+    // 默认选择上个月
+    const now = new Date();
+    let prevMonth = now.getMonth();
+    let prevYear = now.getFullYear();
+    if (prevMonth <= 0) {
+        prevMonth = 12;
+        prevYear -= 1;
+    }
+    const monthStr = prevYear + '-' + String(prevMonth).padStart(2, '0');
+    document.getElementById('settlement-month').value = monthStr;
 }
 
 // 自动保存功能（可选）
