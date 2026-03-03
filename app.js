@@ -70,6 +70,13 @@ function loadData() {
 
 // 保存数据
 function saveData() {
+    // 确保学员课时数据正确
+    data.students.forEach(student => {
+        if (student.remainingCount < 0) student.remainingCount = 0;
+        if (student.usedCount < 0) student.usedCount = 0;
+        if (student.totalCount < 0) student.totalCount = 0;
+    });
+    
     try {
         localStorage.setItem('shufaMemberSystem', JSON.stringify(data));
     } catch (e) {
@@ -664,13 +671,15 @@ function addRecharge() {
     
     data.recharges.push(recharge);
     
-    // 如果是新学员，检查是否需要自动创建学员记录
-    if (type === 'new') {
-        const existingStudent = data.students.find(s => s.name === studentName);
-        if (!existingStudent) {
-            // 不自动创建，由用户在学员管理模块手动创建
-            showNotification('新学员充值成功，请在学员管理模块完善学员信息');
-        }
+    // 联动学员管理模块：更新学员课时
+    const student = data.students.find(s => s.name === studentName);
+    if (student) {
+        student.totalCount = (student.totalCount || 0) + pkg.count;
+        student.remainingCount = (student.remainingCount || 0) + pkg.count;
+        renderStudents();
+    } else {
+        // 学员不存在，提示用户
+        showNotification('续费成功，请在学员管理模块完善学员信息');
     }
     
     saveData();
@@ -738,9 +747,20 @@ async function deleteRecharge(id) {
     const confirmed = await showConfirm('确定要删除这条续费记录吗？此操作不可恢复！');
     if (!confirmed) return;
     
+    // 联动学员管理模块：删除前恢复学员课时
+    const recharge = data.recharges.find(r => r.id === id);
+    if (recharge) {
+        const student = data.students.find(s => s.name === recharge.studentName);
+        if (student) {
+            student.totalCount = (student.totalCount || 0) - recharge.count;
+            student.remainingCount = (student.remainingCount || 0) - recharge.count;
+        }
+    }
+    
     data.recharges = data.recharges.filter(r => r.id !== id);
     saveData();
     renderRecharges();
+    renderStudents();
     showNotification('续费记录删除成功');
 }
 
@@ -845,7 +865,8 @@ function editRecharge(id) {
     const count = parseInt(document.getElementById('edit-recharge-count').value);
     const packageAmount = parseFloat(document.getElementById('edit-recharge-package-amount').value);
     const discount = parseFloat(document.getElementById('edit-recharge-discount').value) || 0;
-    const platformFee = parseFloat(document.getElementById('edit-recharge-platform-fee').value) || 0;
+    const platformFeePercent = parseFloat(document.getElementById('edit-recharge-platform-fee').value) || 0;
+    const platformFee = (packageAmount * platformFeePercent / 100);
     const totalAmount = parseFloat(document.getElementById('edit-recharge-total-amount').value);
     
     if (!studentName || !packageName || !count || count <= 0 || !packageAmount || !totalAmount) {
@@ -855,15 +876,37 @@ function editRecharge(id) {
     
     const recharge = data.recharges.find(r => r.id === id);
     if (recharge) {
+        // 记录原来的学员和课时数
+        const oldStudentName = recharge.studentName;
+        const oldCount = recharge.count;
+        
+        // 更新续费记录
         recharge.studentName = studentName;
         recharge.packageName = packageName;
         recharge.count = count;
         recharge.packageAmount = packageAmount;
         recharge.discount = discount;
-        recharge.platformFee = platformFee;
+        recharge.platformFee = platformFeePercent;
         recharge.totalAmount = totalAmount;
+        
+        // 联动学员管理模块
+        // 1. 恢复原来学员的课时
+        const oldStudent = data.students.find(s => s.name === oldStudentName);
+        if (oldStudent) {
+            oldStudent.totalCount = (oldStudent.totalCount || 0) - oldCount;
+            oldStudent.remainingCount = (oldStudent.remainingCount || 0) - oldCount;
+        }
+        
+        // 2. 增加新课程时数到新学员
+        const newStudent = data.students.find(s => s.name === studentName);
+        if (newStudent) {
+            newStudent.totalCount = (newStudent.totalCount || 0) + count;
+            newStudent.remainingCount = (newStudent.remainingCount || 0) + count;
+        }
+        
         saveData();
         renderRecharges();
+        renderStudents();
         document.querySelector('.modal').remove();
         showNotification('续费记录修改成功');
     }
@@ -941,9 +984,9 @@ function addStudent() {
         return;
     }
     
-    // 查找该学员的充值记录
-    const recharge = data.recharges.find(r => r.studentName === name && r.packageName === packageName);
-    const totalCount = recharge ? recharge.count : 0;
+    // 查找该学员的所有充值记录，计算总课时
+    const studentRecharges = data.recharges.filter(r => r.studentName === name);
+    const totalCount = studentRecharges.reduce((sum, r) => sum + (r.count || 0), 0);
     
     const student = {
         id: Date.now(),
