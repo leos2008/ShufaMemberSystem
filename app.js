@@ -1025,12 +1025,27 @@ function addStudent() {
     showNotification('学员添加成功');
 }
 
+function getRemainingColor(ratio) {
+    if (ratio > 0.5) {
+        return '#22c55e';
+    } else if (ratio > 0.25) {
+        return '#f59e0b';
+    } else {
+        return '#ef4444';
+    }
+}
+
 function renderStudents() {
     const tbody = document.getElementById('student-table-body');
     tbody.innerHTML = '';
     
     data.students.forEach(student => {
         const tr = document.createElement('tr');
+        const remainingCount = student.remainingCount || 0;
+        const totalCount = student.totalCount || 1;
+        const ratio = remainingCount / totalCount;
+        const color = getRemainingColor(ratio);
+        
         tr.innerHTML = `
             <td>${student.name}</td>
             <td>${student.age}</td>
@@ -1039,7 +1054,7 @@ function renderStudents() {
             <td>${student.className}</td>
             <td>${student.totalCount}</td>
             <td>${student.usedCount}</td>
-            <td>${student.remainingCount}</td>
+            <td style="font-weight: 600; color: ${color};">${remainingCount}</td>
             <td>
                 <button class="btn btn-info" onclick="showStudentAttendance(${student.id})">考勤查询</button>
                 <button class="btn btn-warning" onclick="showEditStudentModal(${student.id})">修改</button>
