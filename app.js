@@ -15,45 +15,10 @@ const colorPool = [
 
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
-    loadTheme();
     loadData();
     initTabs();
     renderAllTables();
 });
-
-// 加载主题
-function loadTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'blue';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeSelector(savedTheme);
-}
-
-// 切换主题
-function changeTheme(themeName) {
-    document.documentElement.setAttribute('data-theme', themeName);
-    localStorage.setItem('theme', themeName);
-    updateThemeSelector(themeName);
-    showNotification('主题已切换');
-}
-
-// 更新主题选择器状态
-function updateThemeSelector(themeName) {
-    // 更新下拉选择框
-    const select = document.getElementById('theme-select');
-    if (select) {
-        select.value = themeName;
-    }
-    
-    // 更新主题卡片状态
-    document.querySelectorAll('.theme-card').forEach(card => {
-        card.classList.remove('active');
-    });
-    
-    const activeCard = document.querySelector(`.theme-card[onclick="changeTheme('${themeName}')"]`);
-    if (activeCard) {
-        activeCard.classList.add('active');
-    }
-}
 
 // 加载数据
 function loadData() {
