@@ -1157,16 +1157,31 @@ function queryStudentAttendance(studentName) {
     if (records.length === 0) {
         resultDiv.innerHTML = '<p style="color: #666; text-align: center;">该月份暂无考勤记录</p>';
     } else {
+        // 创建日期到颜色的映射，确保相同日期颜色一致
+        const dateColorMap = {};
+        records.forEach((record, index) => {
+            if (!dateColorMap[record.date]) {
+                dateColorMap[record.date] = colorPool[Object.keys(dateColorMap).length % colorPool.length];
+            }
+        });
+        
+        const dateTags = records.map(r => {
+            const color = dateColorMap[r.date];
+            const recordDate = new Date(r.date);
+            const monthDay = (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
+            let tooltipContent = (recordDate.getFullYear()) + '年' + (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
+            if (r.remark) {
+                tooltipContent += '，' + r.remark;
+            }
+            return `<span class="tag tooltip" style="background: ${color}" data-tooltip="${tooltipContent}">${monthDay}</span>`;
+        }).join('');
+        
         resultDiv.innerHTML = `
             <p><strong>查询月份：</strong>${year}年${month}月</p>
             <p><strong>考勤次数：</strong>${records.length} 次</p>
             <p><strong>考勤日期：</strong></p>
             <div style="margin-top: 10px;">
-                ${records.map(r => `
-                    <span class="tag" style="background: ${colorPool[records.indexOf(r) % colorPool.length]}">
-                        ${r.date}
-                    </span>
-                `).join('')}
+                ${dateTags}
             </div>
         `;
     }
@@ -1307,27 +1322,26 @@ function renderAttendance() {
         }
         
         // 生成当月考勤日期标签
+        // 创建日期到颜色的映射，确保相同日期颜色一致
+        const dateColorMap = {};
+        currentMonthRecords.forEach((record, index) => {
+            if (!dateColorMap[record.date]) {
+                dateColorMap[record.date] = colorPool[Object.keys(dateColorMap).length % colorPool.length];
+            }
+        });
+        
         const dateTags = currentMonthRecords.map((record, index) => {
-            const color = colorPool[index % colorPool.length];
+            const color = dateColorMap[record.date];
             const recordDate = new Date(record.date);
-            const fullDate = recordDate.toLocaleDateString('zh-CN');
             const yearMonthDay = recordDate.getFullYear() + '年' + 
                                 String(recordDate.getMonth() + 1).padStart(2, '0') + '月' +
                                 String(recordDate.getDate()).padStart(2, '0') + '日';
-            const monthDay = String(recordDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                            String(recordDate.getDate()).padStart(2, '0');
-            
-            // 如果有时间戳，显示具体时间
-            const timeDisplay = record.timestamp ? 
-                `<div style="font-size: 10px; opacity: 0.8; margin-top: 2px;">${new Date(record.timestamp).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})}</div>` : '';
+            const monthDay = (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
             
             // 构建 tooltip 内容
             let tooltipContent = yearMonthDay;
-            if (record.timestamp) {
-                tooltipContent += ' ' + new Date(record.timestamp).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
-            }
             if (record.remark) {
-                tooltipContent += '\n备注：' + record.remark;
+                tooltipContent += '，' + record.remark;
             }
             
             return `
@@ -1336,7 +1350,6 @@ function renderAttendance() {
                       data-tooltip="${tooltipContent}"
                       onclick="event.stopPropagation(); showDeleteConfirm(${record.id}, '${student.name}')">
                     ${monthDay}
-                    ${timeDisplay}
                     <span class="tag-delete" onclick="event.stopPropagation(); showDeleteConfirm(${record.id}, '${student.name}')">×</span>
                 </span>
             `;
