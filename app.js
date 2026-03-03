@@ -70,12 +70,8 @@ function loadData() {
 
 // 保存数据
 function saveData() {
-    // 确保学员课时数据正确
-    data.students.forEach(student => {
-        if (student.remainingCount < 0) student.remainingCount = 0;
-        if (student.usedCount < 0) student.usedCount = 0;
-        if (student.totalCount < 0) student.totalCount = 0;
-    });
+    // 允许负数课时，-1 代表欠课一次
+    // 不进行负数校验
     
     try {
         localStorage.setItem('shufaMemberSystem', JSON.stringify(data));
@@ -144,6 +140,7 @@ function showConfirm(message) {
             <div class="modal-content" style="min-width: 300px;">
                 <div class="modal-header">
                     <h3>确认操作</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
                 </div>
                 <p style="margin-bottom: 20px;">${message}</p>
                 <div class="modal-footer">
@@ -176,6 +173,7 @@ function showAddPackageModal() {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>添加课包</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>课包名称</label>
@@ -281,6 +279,7 @@ function showEditPackageModal(id) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>修改课包</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>课包名称</label>
@@ -354,6 +353,7 @@ function showAddClassModal() {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>添加班级</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>班级名称</label>
@@ -433,6 +433,7 @@ function showEditClassModal(id) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>修改班级</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>班级名称</label>
@@ -532,6 +533,7 @@ function showAddRechargeModal() {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>添加续费</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>类型</label>
@@ -796,6 +798,7 @@ function showEditRechargeModal(id) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>修改续费记录</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>学员姓名</label>
@@ -942,6 +945,7 @@ function showAddStudentModal() {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>添加学员</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>姓名</label>
@@ -1032,7 +1036,9 @@ function addStudent() {
 }
 
 function getRemainingColor(ratio) {
-    if (ratio > 0.5) {
+    if (ratio < 0) {
+        return '#ef4444';
+    } else if (ratio > 0.5) {
         return '#22c55e';
     } else if (ratio > 0.25) {
         return '#f59e0b';
@@ -1049,7 +1055,7 @@ function renderStudents() {
         const tr = document.createElement('tr');
         const remainingCount = student.remainingCount || 0;
         const totalCount = student.totalCount || 1;
-        const ratio = remainingCount / totalCount;
+        const ratio = totalCount > 0 ? remainingCount / totalCount : remainingCount;
         const color = getRemainingColor(ratio);
         
         tr.innerHTML = `
@@ -1122,6 +1128,7 @@ function showStudentAttendance(studentId) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>${student.name} - 考勤查询</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>选择月份</label>
@@ -1213,6 +1220,7 @@ function showEditStudentModal(id) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>修改学员信息</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>姓名</label>
@@ -1559,6 +1567,7 @@ function showAddAttendanceModal(studentId) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>考勤登记 - ${student.name}</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
                 <label>选择日期</label>
@@ -1592,11 +1601,7 @@ function addAttendance(studentId) {
         return;
     }
     
-    // 检查学员剩余课时
-    if (student.remainingCount <= 0) {
-        showNotification('学员课时已用完，无法考勤', 'error');
-        return;
-    }
+    // 允许负数课时考勤（欠课）
     
     const now = new Date();
     const timestamp = now.getTime(); // 添加时间戳以支持同一天多次考勤
@@ -1659,6 +1664,7 @@ function showMonthAttendanceDetail(studentName, year, month) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>${studentName} - ${year}年${month}月考勤详情</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div style="margin: 20px 0;">
                 <p><strong>考勤次数：</strong>${records.length} 次</p>
@@ -1685,8 +1691,10 @@ function showDeleteConfirm(recordId, studentName) {
 
 async function removeAttendanceRecord(recordId, studentName) {
     const student = data.students.find(s => s.name === studentName);
-    if (student && student.usedCount > 0) {
-        student.usedCount--;
+    if (student) {
+        if (student.usedCount > 0) {
+            student.usedCount--;
+        }
         student.remainingCount++;
     }
     
@@ -1776,6 +1784,7 @@ function generateMonthlyReport() {
         <div class="modal-content" style="min-width: 600px; max-width: 800px;">
             <div class="modal-header">
                 <h3>月度考勤报告</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             ${report}
             <div class="modal-footer">
@@ -1816,9 +1825,18 @@ function exportData() {
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+    
     const a = document.createElement('a');
     a.href = url;
-    a.download = `学员管理系统备份_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+    a.download = `学员管理系统备份_${timestamp}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
