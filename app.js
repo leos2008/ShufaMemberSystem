@@ -1355,11 +1355,14 @@ function renderAttendance() {
             `;
         }).join('');
         
-        // 生成最近 4 个月考勤展示
+        // 生成最近 4 个月考勤展示 - 卡片形式
         const last4MonthsDisplay = last4Months.map(m => {
-            return `<div style="text-align: center; padding: 4px 8px; background: var(--hover-bg); border-radius: 4px; margin: 2px 0;">
+            return `<div style="text-align: center; padding: 8px 12px; background: var(--hover-bg); border-radius: 8px; margin: 2px; cursor: pointer; transition: all 0.2s;" 
+                        onclick="event.stopPropagation(); showMonthAttendanceDetail('${student.name}', ${m.year}, ${m.month})"
+                        onmouseover="this.style.background='var(--primary-color)'; this.style.color='white';"
+                        onmouseout="this.style.background='var(--hover-bg)'; this.style.color='';">
                 <div style="font-size: 12px; color: var(--text-secondary);">${m.year}年${m.month}月</div>
-                <div style="font-weight: 600; color: var(--primary-color);">${m.count}次</div>
+                <div style="font-weight: 600; color: var(--primary-color); font-size: 14px;">${m.count}次</div>
             </div>`;
         }).join('');
         
@@ -1568,6 +1571,56 @@ function addAttendance(studentId) {
 }
 
 // 显示删除确认弹窗
+function showMonthAttendanceDetail(studentName, year, month) {
+    const records = data.attendance.filter(a => {
+        const recordDate = new Date(a.date);
+        return a.studentName === studentName && 
+               recordDate.getFullYear() === year && 
+               recordDate.getMonth() + 1 === month;
+    });
+    
+    // 创建日期到颜色的映射
+    const colorPool = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+    const dateColorMap = {};
+    records.forEach((record, index) => {
+        if (!dateColorMap[record.date]) {
+            dateColorMap[record.date] = colorPool[Object.keys(dateColorMap).length % colorPool.length];
+        }
+    });
+    
+    const dateTags = records.map(r => {
+        const color = dateColorMap[r.date];
+        const recordDate = new Date(r.date);
+        const monthDay = (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
+        let tooltipContent = recordDate.getFullYear() + '年' + (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
+        if (r.remark) {
+            tooltipContent += '，' + r.remark;
+        }
+        return `<span class="tag tooltip" style="background: ${color}" data-tooltip="${tooltipContent}">${monthDay}</span>`;
+    }).join('');
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>${studentName} - ${year}年${month}月考勤详情</h3>
+            </div>
+            <div style="margin: 20px 0;">
+                <p><strong>考勤次数：</strong>${records.length} 次</p>
+                <p><strong>考勤日期：</strong></p>
+                <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${dateTags}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="this.closest('.modal').remove()">关闭</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
 function showDeleteConfirm(recordId, studentName) {
     showConfirm('确定要删除这条考勤记录吗？课时将相应恢复。').then(confirmed => {
         if (confirmed) {
@@ -1608,6 +1661,9 @@ function generateMonthlyReport() {
     
     const attendedStudents = new Set(records.map(r => r.studentName));
     
+    // 颜色池
+    const colorPool = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+    
     const report = `
         <div style="padding: 20px;">
             <h3 style="margin-bottom: 20px;">${year}年${month}月 考勤报告</h3>
@@ -1627,11 +1683,31 @@ function generateMonthlyReport() {
                 <tbody>
                     ${data.students.map(student => {
                         const studentRecords = records.filter(r => r.studentName === student.name);
+                        
+                        // 创建日期到颜色的映射，确保相同日期颜色一致
+                        const dateColorMap = {};
+                        studentRecords.forEach((record, index) => {
+                            if (!dateColorMap[record.date]) {
+                                dateColorMap[record.date] = colorPool[Object.keys(dateColorMap).length % colorPool.length];
+                            }
+                        });
+                        
+                        const dateTags = studentRecords.map(r => {
+                            const color = dateColorMap[r.date];
+                            const recordDate = new Date(r.date);
+                            const monthDay = (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
+                            let tooltipContent = recordDate.getFullYear() + '年' + (recordDate.getMonth() + 1) + '月' + recordDate.getDate() + '日';
+                            if (r.remark) {
+                                tooltipContent += '，' + r.remark;
+                            }
+                            return `<span class="tag tooltip" style="background: ${color}; margin: 2px;" data-tooltip="${tooltipContent}">${monthDay}</span>`;
+                        }).join('');
+                        
                         return `
                             <tr>
                                 <td>${student.name}</td>
                                 <td>${studentRecords.length}</td>
-                                <td>${studentRecords.map(r => r.date).join(', ') || '-'}</td>
+                                <td>${dateTags || '-'}</td>
                             </tr>
                         `;
                     }).join('')}
