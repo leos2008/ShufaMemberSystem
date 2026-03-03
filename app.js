@@ -64,7 +64,7 @@ function loadData() {
             
             // 为现有充值记录自动生成充值序号（全局唯一）
             if (data.recharges && data.recharges.length > 0) {
-                let hasNewSeq = false;
+                let hasChanges = false;
                 
                 // 先按日期排序所有充值记录
                 const sortedRecharges = [...data.recharges].sort((a, b) => {
@@ -81,16 +81,21 @@ function loadData() {
                     })
                     .reduce((max, curr) => Math.max(max, curr), 0);
                 
+                // 重新按日期排序后为所有记录分配序号，确保序号与日期顺序一致
                 sortedRecharges.forEach(r => {
-                    if (!r.rechargeSeq) {
+                    const currentMatch = r.rechargeSeq?.match(/CZ-(\d+)/);
+                    const currentSeq = currentMatch ? parseInt(currentMatch[1]) : 0;
+                    
+                    // 如果没有序号，或者序号不连续，重新分配
+                    if (!r.rechargeSeq || currentSeq === 0 || currentSeq > maxSeq + 1) {
                         maxSeq++;
                         r.rechargeSeq = 'CZ-' + String(maxSeq).padStart(6, '0');
-                        hasNewSeq = true;
+                        hasChanges = true;
                     }
                 });
                 
-                // 如果生成了新序号，保存数据
-                if (hasNewSeq) {
+                // 如果有变化，保存数据
+                if (hasChanges) {
                     saveData();
                 }
             }
@@ -2039,21 +2044,28 @@ function calculateConsumptionCost(studentName, year, month, consumedCount) {
     
     if (recharges.length === 0) return 0;
     
-    // Build a list of all classes with their unit prices
+    // Build a list of all classes with their unit prices, keeping the rechargeSeq order
     let availableClasses = [];
     recharges.forEach(r => {
         const unitPrice = r.count > 0 && r.totalAmount ? r.totalAmount / r.count : 0;
         const dateStr = r.date + ' ' + (r.time || '00:00:00');
+        const seqNum = r.rechargeSeq ? parseInt(r.rechargeSeq.replace(/\D/g, '')) || 0 : 0;
         for (let i = 0; i < r.count; i++) {
             availableClasses.push({
                 unitPrice: unitPrice,
-                date: dateStr
+                date: dateStr,
+                seqNum: seqNum
             });
         }
     });
     
-    // Sort by date (oldest first) - FIFO
-    availableClasses.sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Sort by rechargeSeq first, then by date (FIFO)
+    availableClasses.sort((a, b) => {
+        if (a.seqNum !== b.seqNum) {
+            return a.seqNum - b.seqNum;
+        }
+        return new Date(a.date) - new Date(b.date);
+    });
     
     // Get attendance records for the target month
     const monthRecords = data.attendance.filter(a => {
@@ -2110,12 +2122,19 @@ function showSettlementDetail(studentName, year, month, consumedCount) {
                     dateFormatted: dateFormatted,
                     rechargeSeq: r.rechargeSeq || '',
                     rechargeCount: r.count,
-                    rechargeTotal: r.totalAmount
+                    rechargeTotal: r.totalAmount,
+                    seqNum: r.rechargeSeq ? parseInt(r.rechargeSeq.replace(/\D/g, '')) || 0 : 0
                 });
             }
         });
         
-        availableClasses.sort((a, b) => new Date(a.date) - new Date(b.date));
+        // Sort by rechargeSeq first, then by date (FIFO)
+        availableClasses.sort((a, b) => {
+            if (a.seqNum !== b.seqNum) {
+                return a.seqNum - b.seqNum;
+            }
+            return new Date(a.date) - new Date(b.date);
+        });
     }
     
     const monthRecords = data.attendance.filter(a => {
