@@ -180,6 +180,25 @@
             background: var(--hover-bg);
             font-weight: 600;
             color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background: var(--border-color);
+        }
+
+        th .sort-icon {
+            margin-left: 5px;
+            font-size: 12px;
+            opacity: 0.3;
+        }
+
+        th.sort-asc .sort-icon,
+        th.sort-desc .sort-icon {
+            opacity: 1;
+            color: var(--primary-color);
         }
 
         tr:hover {
@@ -253,6 +272,7 @@
             margin: 2px;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
         }
 
         .tag:hover {
@@ -260,16 +280,30 @@
         }
 
         .tag-delete {
-            margin-left: 5px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
             color: white;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(245, 101, 101, 0.9);
             border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            display: inline-flex;
+            width: 18px;
+            height: 18px;
+            display: none;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .tag:hover .tag-delete {
+            display: flex;
+        }
+
+        .tag-delete:hover {
+            background: #e53e3e;
+            transform: scale(1.2);
         }
 
         .stats-info {
@@ -367,8 +401,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>课包名称</th>
-                        <th>课时数</th>
+                        <th onclick="sortTable('package-table-body', 0, 'string')">课包名称 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('package-table-body', 1, 'number')">课时数 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('package-table-body', 2, 'number')">课包金额 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('package-table-body', 3, 'number')">单次课费用 <span class="sort-icon">⇅</span></th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -388,8 +424,8 @@
             <table>
                 <thead>
                     <tr>
-                        <th>班级名称</th>
-                        <th>上课时间</th>
+                        <th onclick="sortTable('class-table-body', 0, 'string')">班级名称 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('class-table-body', 1, 'string')">上课时间 <span class="sort-icon">⇅</span></th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -414,11 +450,14 @@
             <table>
                 <thead>
                     <tr>
-                        <th>姓名</th>
-                        <th>课包名称</th>
-                        <th>新增课时数</th>
-                        <th>充值日期</th>
-                        <th>充值时间</th>
+                        <th onclick="sortTable('recharge-table-body', 0, 'string')">姓名 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('recharge-table-body', 1, 'string')">课包名称 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('recharge-table-body', 2, 'number')">新增课时数 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('recharge-table-body', 3, 'number')">课包金额 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('recharge-table-body', 4, 'number')">优惠金额 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('recharge-table-body', 5, 'number')">实付金额 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('recharge-table-body', 6, 'date')">充值日期 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('recharge-table-body', 7, 'time')">充值时间 <span class="sort-icon">⇅</span></th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -448,15 +487,15 @@
             <table>
                 <thead>
                     <tr>
-                        <th>姓名</th>
-                        <th>年龄</th>
-                        <th>学校</th>
-                        <th>电话</th>
-                        <th>班级</th>
-                        <th>初始课包</th>
-                        <th>总课时</th>
-                        <th>已消耗</th>
-                        <th>剩余</th>
+                        <th onclick="sortTable('student-table-body', 0, 'string')">姓名 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 1, 'number')">年龄 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 2, 'string')">学校 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 3, 'string')">电话 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 4, 'string')">班级 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 5, 'string')">初始课包 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 6, 'number')">总课时 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 7, 'number')">已消耗 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('student-table-body', 8, 'number')">剩余 <span class="sort-icon">⇅</span></th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -487,13 +526,12 @@
             <table>
                 <thead>
                     <tr>
-                        <th>姓名</th>
-                        <th>班级</th>
+                        <th onclick="sortTable('attendance-table-body', 0, 'string')">姓名 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('attendance-table-body', 1, 'string')">班级 <span class="sort-icon">⇅</span></th>
                         <th>当月考勤日期</th>
-                        <th>当月次数</th>
-                        <th>剩余课时</th>
-                        <th>上月考勤次数</th>
-                        <th>上上月考勤次数</th>
+                        <th onclick="sortTable('attendance-table-body', 3, 'number')">当月次数 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('attendance-table-body', 4, 'number')">剩余课时 <span class="sort-icon">⇅</span></th>
+                        <th>最近 4 个月考勤</th>
                         <th>操作</th>
                     </tr>
                 </thead>

@@ -170,7 +170,15 @@ function showAddPackageModal() {
             </div>
             <div class="form-group">
                 <label>课时数</label>
-                <input type="number" id="package-count" placeholder="请输入课时数">
+                <input type="number" id="package-count" placeholder="请输入课时数" oninput="calculatePackageUnitPrice()">
+            </div>
+            <div class="form-group">
+                <label>课包金额（元）</label>
+                <input type="number" id="package-amount" placeholder="请输入课包总金额" oninput="calculatePackageUnitPrice()">
+            </div>
+            <div class="form-group">
+                <label>单次课费用（元）</label>
+                <input type="number" id="package-unit-price" placeholder="自动计算" readonly>
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="this.closest('.modal').remove()">取消</button>
@@ -181,11 +189,25 @@ function showAddPackageModal() {
     document.body.appendChild(modal);
 }
 
+function calculatePackageUnitPrice() {
+    const amount = parseFloat(document.getElementById('package-amount').value) || 0;
+    const count = parseInt(document.getElementById('package-count').value) || 0;
+    
+    if (amount > 0 && count > 0) {
+        const unitPrice = (amount / count).toFixed(2);
+        document.getElementById('package-unit-price').value = unitPrice;
+    } else {
+        document.getElementById('package-unit-price').value = '';
+    }
+}
+
 function addPackage() {
     const name = document.getElementById('package-name').value.trim();
     const count = parseInt(document.getElementById('package-count').value);
+    const amount = parseFloat(document.getElementById('package-amount').value);
+    const unitPrice = parseFloat(document.getElementById('package-unit-price').value);
     
-    if (!name || !count || count <= 0) {
+    if (!name || !count || count <= 0 || !amount || amount <= 0 || !unitPrice || unitPrice <= 0) {
         showNotification('请填写完整的课包信息', 'error');
         return;
     }
@@ -193,7 +215,9 @@ function addPackage() {
     const packageItem = {
         id: Date.now(),
         name: name,
-        count: count
+        count: count,
+        amount: amount,
+        unitPrice: unitPrice
     };
     
     data.packages.push(packageItem);
@@ -213,6 +237,8 @@ function renderPackages() {
         tr.innerHTML = `
             <td>${pkg.name}</td>
             <td>${pkg.count} 课时</td>
+            <td>¥${pkg.amount?.toFixed(2) || '0.00'}</td>
+            <td>¥${pkg.unitPrice?.toFixed(2) || '0.00'}</td>
             <td>
                 <button class="btn btn-warning" onclick="showEditPackageModal(${pkg.id})">修改</button>
                 <button class="btn btn-danger" onclick="deletePackage(${pkg.id})">删除</button>
@@ -249,7 +275,15 @@ function showEditPackageModal(id) {
             </div>
             <div class="form-group">
                 <label>课时数</label>
-                <input type="number" id="edit-package-count" value="${pkg.count}">
+                <input type="number" id="edit-package-count" value="${pkg.count}" oninput="calculateEditPackageUnitPrice()">
+            </div>
+            <div class="form-group">
+                <label>课包金额（元）</label>
+                <input type="number" id="edit-package-amount" value="${pkg.amount || ''}" oninput="calculateEditPackageUnitPrice()">
+            </div>
+            <div class="form-group">
+                <label>单次课费用（元）</label>
+                <input type="number" id="edit-package-unit-price" value="${pkg.unitPrice || ''}" readonly>
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="this.closest('.modal').remove()">取消</button>
@@ -258,13 +292,30 @@ function showEditPackageModal(id) {
         </div>
     `;
     document.body.appendChild(modal);
+    
+    // 初始化计算一次
+    calculateEditPackageUnitPrice();
+}
+
+function calculateEditPackageUnitPrice() {
+    const amount = parseFloat(document.getElementById('edit-package-amount').value) || 0;
+    const count = parseInt(document.getElementById('edit-package-count').value) || 0;
+    
+    if (amount > 0 && count > 0) {
+        const unitPrice = (amount / count).toFixed(2);
+        document.getElementById('edit-package-unit-price').value = unitPrice;
+    } else {
+        document.getElementById('edit-package-unit-price').value = '';
+    }
 }
 
 function editPackage(id) {
     const name = document.getElementById('edit-package-name').value.trim();
     const count = parseInt(document.getElementById('edit-package-count').value);
+    const amount = parseFloat(document.getElementById('edit-package-amount').value);
+    const unitPrice = parseFloat(document.getElementById('edit-package-unit-price').value);
     
-    if (!name || !count || count <= 0) {
+    if (!name || !count || count <= 0 || !amount || amount <= 0 || !unitPrice || unitPrice <= 0) {
         showNotification('请填写完整的课包信息', 'error');
         return;
     }
@@ -273,6 +324,8 @@ function editPackage(id) {
     if (pkg) {
         pkg.name = name;
         pkg.count = count;
+        pkg.amount = amount;
+        pkg.unitPrice = unitPrice;
         saveData();
         renderPackages();
         document.querySelector('.modal').remove();
@@ -483,9 +536,26 @@ function showAddRechargeModal() {
             </div>
             <div class="form-group">
                 <label>课包名称</label>
-                <select id="recharge-package">
+                <select id="recharge-package" onchange="updateRechargeAmounts()">
                     <option value="">请选择课包</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label>课包金额（元）</label>
+                <input type="number" id="recharge-package-amount" placeholder="请输入课包金额" readonly>
+            </div>
+            <div class="form-group">
+                <label>优惠金额（元）</label>
+                <input type="number" id="recharge-discount" value="0" placeholder="请输入优惠金额" oninput="calculateRechargeTotal()">
+            </div>
+            <div class="form-group">
+                <label>平台扣点（%）</label>
+                <input type="number" id="recharge-platform-fee" value="0" placeholder="请输入扣点百分比" oninput="calculateRechargeTotal()">
+                <small id="recharge-platform-fee-display" style="color: var(--text-secondary); font-size: 12px;"></small>
+            </div>
+            <div class="form-group">
+                <label>实付金额（元）</label>
+                <input type="number" id="recharge-total-amount" placeholder="实付金额" readonly>
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="this.closest('.modal').remove()">取消</button>
@@ -514,6 +584,35 @@ function toggleRechargeType() {
     }
 }
 
+function updateRechargeAmounts() {
+    const packageName = document.getElementById('recharge-package').value;
+    const pkg = data.packages.find(p => p.name === packageName);
+    
+    if (pkg && pkg.amount) {
+        document.getElementById('recharge-package-amount').value = pkg.amount;
+        calculateRechargeTotal();
+    } else {
+        document.getElementById('recharge-package-amount').value = '';
+        document.getElementById('recharge-total-amount').value = '';
+    }
+}
+
+function calculateRechargeTotal() {
+    const packageAmount = parseFloat(document.getElementById('recharge-package-amount').value) || 0;
+    const discount = parseFloat(document.getElementById('recharge-discount').value) || 0;
+    const platformFeePercent = parseFloat(document.getElementById('recharge-platform-fee').value) || 0;
+    const platformFee = (packageAmount * platformFeePercent / 100);
+    
+    // 显示平台扣点金额
+    const feeDisplay = document.getElementById('recharge-platform-fee-display');
+    if (feeDisplay) {
+        feeDisplay.textContent = platformFeePercent > 0 ? `（扣点金额：¥${platformFee.toFixed(2)}）` : '';
+    }
+    
+    const totalAmount = packageAmount - discount - platformFee;
+    document.getElementById('recharge-total-amount').value = totalAmount > 0 ? totalAmount.toFixed(2) : 0;
+}
+
 function updateRechargeStudentSelect() {
     const select = document.getElementById('recharge-student-select');
     if (!select) return;
@@ -534,8 +633,11 @@ function addRecharge() {
         ? document.getElementById('recharge-student-select').value 
         : document.getElementById('recharge-student-name').value.trim();
     const packageName = document.getElementById('recharge-package').value;
+    const packageAmount = parseFloat(document.getElementById('recharge-package-amount').value);
+    const discount = parseFloat(document.getElementById('recharge-discount').value) || 0;
+    const totalAmount = parseFloat(document.getElementById('recharge-total-amount').value);
     
-    if (!studentName || !packageName) {
+    if (!studentName || !packageName || !packageAmount || !totalAmount) {
         showNotification('请填写完整的续费信息', 'error');
         return;
     }
@@ -552,6 +654,10 @@ function addRecharge() {
         studentName: studentName,
         packageName: packageName,
         count: pkg.count,
+        packageAmount: packageAmount,
+        discount: discount,
+        platformFee: parseFloat(document.getElementById('recharge-platform-fee').value) || 0,
+        totalAmount: totalAmount,
         date: now.toLocaleDateString('zh-CN'),
         time: now.toLocaleTimeString('zh-CN')
     };
@@ -584,6 +690,9 @@ function renderRecharges() {
             <td>${recharge.studentName}</td>
             <td>${recharge.packageName}</td>
             <td>${recharge.count} 课时</td>
+            <td>¥${recharge.packageAmount?.toFixed(2) || '0.00'}</td>
+            <td>¥${recharge.discount?.toFixed(2) || '0.00'}</td>
+            <td style="font-weight: 600; color: var(--primary-color);">¥${recharge.totalAmount?.toFixed(2) || '0.00'}</td>
             <td>${recharge.date}</td>
             <td>${recharge.time}</td>
             <td>
@@ -652,13 +761,30 @@ function showEditRechargeModal(id) {
             </div>
             <div class="form-group">
                 <label>课包名称</label>
-                <select id="edit-recharge-package">
+                <select id="edit-recharge-package" onchange="updateEditRechargeAmounts()">
                     <option value="">请选择课包</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>课时数</label>
                 <input type="number" id="edit-recharge-count" value="${recharge.count}">
+            </div>
+            <div class="form-group">
+                <label>课包金额（元）</label>
+                <input type="number" id="edit-recharge-package-amount" value="${recharge.packageAmount || ''}" oninput="calculateEditRechargeTotal()">
+            </div>
+            <div class="form-group">
+                <label>优惠金额（元）</label>
+                <input type="number" id="edit-recharge-discount" value="${recharge.discount || 0}" oninput="calculateEditRechargeTotal()">
+            </div>
+            <div class="form-group">
+                <label>平台扣点（%）</label>
+                <input type="number" id="edit-recharge-platform-fee" value="${recharge.platformFee || 0}" oninput="calculateEditRechargeTotal()">
+                <small id="edit-recharge-platform-fee-display" style="color: var(--text-secondary); font-size: 12px;"></small>
+            </div>
+            <div class="form-group">
+                <label>实付金额（元）</label>
+                <input type="number" id="edit-recharge-total-amount" value="${recharge.totalAmount || ''}" readonly>
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="this.closest('.modal').remove()">取消</button>
@@ -678,14 +804,51 @@ function showEditRechargeModal(id) {
         }
         pkgSelect.appendChild(option);
     });
+    
+    // 如果已有课包金额，直接设置
+    if (recharge.packageAmount) {
+        calculateEditRechargeTotal();
+    }
+}
+
+function updateEditRechargeAmounts() {
+    const packageName = document.getElementById('edit-recharge-package').value;
+    const pkg = data.packages.find(p => p.name === packageName);
+    
+    if (pkg && pkg.amount) {
+        document.getElementById('edit-recharge-package-amount').value = pkg.amount;
+        calculateEditRechargeTotal();
+    } else {
+        document.getElementById('edit-recharge-package-amount').value = '';
+    }
+}
+
+function calculateEditRechargeTotal() {
+    const packageAmount = parseFloat(document.getElementById('edit-recharge-package-amount').value) || 0;
+    const discount = parseFloat(document.getElementById('edit-recharge-discount').value) || 0;
+    const platformFeePercent = parseFloat(document.getElementById('edit-recharge-platform-fee').value) || 0;
+    const platformFee = (packageAmount * platformFeePercent / 100);
+    
+    // 显示平台扣点金额
+    const feeDisplay = document.getElementById('edit-recharge-platform-fee-display');
+    if (feeDisplay) {
+        feeDisplay.textContent = platformFeePercent > 0 ? `（扣点金额：¥${platformFee.toFixed(2)}）` : '';
+    }
+    
+    const totalAmount = packageAmount - discount - platformFee;
+    document.getElementById('edit-recharge-total-amount').value = totalAmount > 0 ? totalAmount.toFixed(2) : 0;
 }
 
 function editRecharge(id) {
     const studentName = document.getElementById('edit-recharge-student').value.trim();
     const packageName = document.getElementById('edit-recharge-package').value;
     const count = parseInt(document.getElementById('edit-recharge-count').value);
+    const packageAmount = parseFloat(document.getElementById('edit-recharge-package-amount').value);
+    const discount = parseFloat(document.getElementById('edit-recharge-discount').value) || 0;
+    const platformFee = parseFloat(document.getElementById('edit-recharge-platform-fee').value) || 0;
+    const totalAmount = parseFloat(document.getElementById('edit-recharge-total-amount').value);
     
-    if (!studentName || !packageName || !count || count <= 0) {
+    if (!studentName || !packageName || !count || count <= 0 || !packageAmount || !totalAmount) {
         showNotification('请填写完整的续费信息', 'error');
         return;
     }
@@ -695,6 +858,10 @@ function editRecharge(id) {
         recharge.studentName = studentName;
         recharge.packageName = packageName;
         recharge.count = count;
+        recharge.packageAmount = packageAmount;
+        recharge.discount = discount;
+        recharge.platformFee = platformFee;
+        recharge.totalAmount = totalAmount;
         saveData();
         renderRecharges();
         document.querySelector('.modal').remove();
@@ -983,8 +1150,17 @@ function showEditStudentModal(id) {
     `;
     document.body.appendChild(modal);
     
-    updateClassSelects();
-    document.getElementById('edit-student-class').value = student.className;
+    // 先更新班级选择框
+    const classSelect = document.getElementById('edit-student-class');
+    data.classes.forEach(cls => {
+        const option = document.createElement('option');
+        option.value = cls.name;
+        option.textContent = cls.name;
+        if (cls.name === student.className) {
+            option.selected = true;
+        }
+        classSelect.appendChild(option);
+    });
 }
 
 function editStudent(id) {
@@ -1031,53 +1207,65 @@ function renderAttendance() {
                    recordDate.getMonth() + 1 === currentMonth;
         });
         
-        // 获取上月考勤记录
-        let lastMonth = currentMonth - 1;
-        let lastMonthYear = currentYear;
-        if (lastMonth === 0) {
-            lastMonth = 12;
-            lastMonthYear = currentYear - 1;
+        // 获取最近 4 个月的考勤数据
+        const last4Months = [];
+        for (let i = 1; i <= 4; i++) {
+            let month = currentMonth - i;
+            let year = currentYear;
+            
+            // 处理跨年情况
+            while (month <= 0) {
+                month += 12;
+                year -= 1;
+            }
+            
+            const monthRecords = data.attendance.filter(a => {
+                const recordDate = new Date(a.date);
+                return a.studentName === student.name && 
+                       recordDate.getFullYear() === year && 
+                       recordDate.getMonth() + 1 === month;
+            });
+            
+            last4Months.push({
+                month: month,
+                year: year,
+                count: monthRecords.length
+            });
         }
-        
-        const lastMonthRecords = data.attendance.filter(a => {
-            const recordDate = new Date(a.date);
-            return a.studentName === student.name && 
-                   recordDate.getFullYear() === lastMonthYear && 
-                   recordDate.getMonth() + 1 === lastMonth;
-        });
-        
-        // 获取上上月考勤记录
-        let lastLastMonth = lastMonth - 1;
-        let lastLastMonthYear = lastMonthYear;
-        if (lastLastMonth === 0) {
-            lastLastMonth = 12;
-            lastLastMonthYear = lastMonthYear - 1;
-        }
-        
-        const lastLastMonthRecords = data.attendance.filter(a => {
-            const recordDate = new Date(a.date);
-            return a.studentName === student.name && 
-                   recordDate.getFullYear() === lastLastMonthYear && 
-                   recordDate.getMonth() + 1 === lastLastMonth;
-        });
         
         // 生成当月考勤日期标签
         const dateTags = currentMonthRecords.map((record, index) => {
             const color = colorPool[index % colorPool.length];
             const recordDate = new Date(record.date);
             const fullDate = recordDate.toLocaleDateString('zh-CN');
+            const yearMonthDay = recordDate.getFullYear() + '年' + 
+                                String(recordDate.getMonth() + 1).padStart(2, '0') + '月' +
+                                String(recordDate.getDate()).padStart(2, '0') + '日';
             const monthDay = String(recordDate.getMonth() + 1).padStart(2, '0') + '-' + 
                             String(recordDate.getDate()).padStart(2, '0');
+            
+            // 如果有时间戳，显示具体时间
+            const timeDisplay = record.timestamp ? 
+                `<div style="font-size: 10px; opacity: 0.8; margin-top: 2px;">${new Date(record.timestamp).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})}</div>` : '';
             
             return `
                 <span class="tag tooltip" 
                       style="background: ${color}" 
-                      data-tooltip="${fullDate}"
-                      onclick="removeAttendanceRecord(${record.id}, '${student.name}')">
+                      data-tooltip="${yearMonthDay}${record.timestamp ? ' ' + new Date(record.timestamp).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'}) : ''}"
+                      onclick="event.stopPropagation(); showDeleteConfirm(${record.id}, '${student.name}')">
                     ${monthDay}
-                    <span class="tag-delete">×</span>
+                    ${timeDisplay}
+                    <span class="tag-delete" onclick="event.stopPropagation(); showDeleteConfirm(${record.id}, '${student.name}')">×</span>
                 </span>
             `;
+        }).join('');
+        
+        // 生成最近 4 个月考勤展示
+        const last4MonthsDisplay = last4Months.map(m => {
+            return `<div style="text-align: center; padding: 4px 8px; background: var(--hover-bg); border-radius: 4px; margin: 2px 0;">
+                <div style="font-size: 12px; color: var(--text-secondary);">${m.year}年${m.month}月</div>
+                <div style="font-weight: 600; color: var(--primary-color);">${m.count}次</div>
+            </div>`;
         }).join('');
         
         const tr = document.createElement('tr');
@@ -1087,8 +1275,11 @@ function renderAttendance() {
             <td>${dateTags || '<span style="color: #999;">无考勤记录</span>'}</td>
             <td>${currentMonthRecords.length}</td>
             <td>${student.remainingCount}</td>
-            <td>${lastMonthRecords.length}</td>
-            <td>${lastLastMonthRecords.length}</td>
+            <td style="padding: 8px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+                    ${last4MonthsDisplay}
+                </div>
+            </td>
             <td>
                 <button class="btn btn-primary" onclick="showAddAttendanceModal(${student.id})">考勤</button>
             </td>
@@ -1134,33 +1325,31 @@ function filterAttendance() {
             });
         }
         
-        let lastMonth = currentMonth - 1;
-        let lastMonthYear = currentYear;
-        if (lastMonth === 0) {
-            lastMonth = 12;
-            lastMonthYear = currentYear - 1;
+        // 获取最近 4 个月的考勤数据
+        const last4Months = [];
+        for (let i = 1; i <= 4; i++) {
+            let month = currentMonth - i;
+            let year = currentYear;
+            
+            // 处理跨年情况
+            while (month <= 0) {
+                month += 12;
+                year -= 1;
+            }
+            
+            const monthRecords = data.attendance.filter(a => {
+                const recordDate = new Date(a.date);
+                return a.studentName === student.name && 
+                       recordDate.getFullYear() === year && 
+                       recordDate.getMonth() + 1 === month;
+            });
+            
+            last4Months.push({
+                month: month,
+                year: year,
+                count: monthRecords.length
+            });
         }
-        
-        const lastMonthRecords = data.attendance.filter(a => {
-            const recordDate = new Date(a.date);
-            return a.studentName === student.name && 
-                   recordDate.getFullYear() === lastMonthYear && 
-                   recordDate.getMonth() + 1 === lastMonth;
-        });
-        
-        let lastLastMonth = lastMonth - 1;
-        let lastLastMonthYear = lastMonthYear;
-        if (lastLastMonth === 0) {
-            lastLastMonth = 12;
-            lastLastMonthYear = lastMonthYear - 1;
-        }
-        
-        const lastLastMonthRecords = data.attendance.filter(a => {
-            const recordDate = new Date(a.date);
-            return a.studentName === student.name && 
-                   recordDate.getFullYear() === lastLastMonthYear && 
-                   recordDate.getMonth() + 1 === lastLastMonth;
-        });
         
         const dateTags = currentMonthRecords.map((record, index) => {
             const color = colorPool[index % colorPool.length];
@@ -1180,6 +1369,14 @@ function filterAttendance() {
             `;
         }).join('');
         
+        // 生成最近 4 个月考勤展示
+        const last4MonthsDisplay = last4Months.map(m => {
+            return `<div style="text-align: center; padding: 4px 8px; background: var(--hover-bg); border-radius: 4px; margin: 2px 0;">
+                <div style="font-size: 12px; color: var(--text-secondary);">${m.year}年${m.month}月</div>
+                <div style="font-weight: 600; color: var(--primary-color);">${m.count}次</div>
+            </div>`;
+        }).join('');
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${student.name}</td>
@@ -1187,8 +1384,11 @@ function filterAttendance() {
             <td>${dateTags || '<span style="color: #999;">无考勤记录</span>'}</td>
             <td>${currentMonthRecords.length}</td>
             <td>${student.remainingCount}</td>
-            <td>${lastMonthRecords.length}</td>
-            <td>${lastLastMonthRecords.length}</td>
+            <td style="padding: 8px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+                    ${last4MonthsDisplay}
+                </div>
+            </td>
             <td>
                 <button class="btn btn-primary" onclick="showAddAttendanceModal(${student.id})">考勤</button>
             </td>
@@ -1236,26 +1436,20 @@ function addAttendance(studentId) {
         return;
     }
     
-    // 检查该学员该日期是否已有考勤记录
-    const existingRecord = data.attendance.find(a => 
-        a.studentName === student.name && a.date === dateStr
-    );
-    
-    if (existingRecord) {
-        showNotification('该日期已有考勤记录', 'error');
-        return;
-    }
-    
     // 检查学员剩余课时
     if (student.remainingCount <= 0) {
         showNotification('学员课时已用完，无法考勤', 'error');
         return;
     }
     
+    const now = new Date();
+    const timestamp = now.getTime(); // 添加时间戳以支持同一天多次考勤
+    
     const attendance = {
         id: Date.now(),
         studentName: student.name,
-        date: dateStr
+        date: dateStr,
+        timestamp: timestamp // 添加时间戳以区分同一天的多次考勤
     };
     
     data.attendance.push(attendance);
@@ -1272,10 +1466,16 @@ function addAttendance(studentId) {
     showNotification('考勤登记成功');
 }
 
+// 显示删除确认弹窗
+function showDeleteConfirm(recordId, studentName) {
+    showConfirm('确定要删除这条考勤记录吗？课时将相应恢复。').then(confirmed => {
+        if (confirmed) {
+            removeAttendanceRecord(recordId, studentName);
+        }
+    });
+}
+
 async function removeAttendanceRecord(recordId, studentName) {
-    const confirmed = await showConfirm('确定要删除这条考勤记录吗？课时将相应恢复。');
-    if (!confirmed) return;
-    
     const student = data.students.find(s => s.name === studentName);
     if (student && student.usedCount > 0) {
         student.usedCount--;
@@ -1430,3 +1630,107 @@ function importData(input) {
 setInterval(() => {
     saveData();
 }, 60000); // 每分钟自动保存
+
+// 表格排序功能
+let sortState = {}; // 存储每个表格的排序状态
+
+function sortTable(tableBodyId, columnIndex, type) {
+    const tableBody = document.getElementById(tableBodyId);
+    if (!tableBody) return;
+    
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+    const tableHead = tableBody.closest('table').querySelector('thead');
+    const headers = tableHead.querySelectorAll('th');
+    
+    // 获取当前排序状态
+    const key = `${tableBodyId}-${columnIndex}`;
+    const currentState = sortState[key] || 'none';
+    let newState;
+    
+    // 切换排序方向
+    if (currentState === 'none') {
+        newState = 'asc';
+    } else if (currentState === 'asc') {
+        newState = 'desc';
+    } else {
+        newState = 'none';
+    }
+    
+    // 更新排序状态
+    sortState[key] = newState;
+    
+    // 更新所有表头的排序图标
+    headers.forEach((th, index) => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        const icon = th.querySelector('.sort-icon');
+        if (icon) icon.textContent = '⇅';
+    });
+    
+    // 如果是不排序，恢复原始顺序（这里简化处理，不重新排序）
+    if (newState === 'none') {
+        renderAllTables();
+        return;
+    }
+    
+    // 设置当前表头的排序状态
+    const currentHeader = headers[columnIndex];
+    currentHeader.classList.add(newState === 'asc' ? 'sort-asc' : 'sort-desc');
+    const currentIcon = currentHeader.querySelector('.sort-icon');
+    if (currentIcon) {
+        currentIcon.textContent = newState === 'asc' ? '↑' : '↓';
+    }
+    
+    // 排序
+    rows.sort((a, b) => {
+        const aCell = a.cells[columnIndex];
+        const bCell = b.cells[columnIndex];
+        
+        if (!aCell || !bCell) return 0;
+        
+        let aText = aCell.textContent.trim();
+        let bText = bCell.textContent.trim();
+        
+        // 跳过操作列
+        if (aText === '' || bText === '') return 0;
+        
+        let aValue, bValue;
+        
+        // 根据类型转换值
+        switch (type) {
+            case 'number':
+                aValue = parseFloat(aText) || 0;
+                bValue = parseFloat(bText) || 0;
+                break;
+            case 'date':
+                aValue = new Date(aText);
+                bValue = new Date(bText);
+                break;
+            case 'time':
+                // 处理时间格式
+                aValue = parseTime(aText);
+                bValue = parseTime(bText);
+                break;
+            default: // string
+                aValue = aText.toLowerCase();
+                bValue = bText.toLowerCase();
+        }
+        
+        if (newState === 'asc') {
+            return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+        } else {
+            return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+        }
+    });
+    
+    // 重新插入排序后的行
+    rows.forEach(row => tableBody.appendChild(row));
+}
+
+// 解析时间字符串为数字（用于比较）
+function parseTime(timeStr) {
+    const match = timeStr.match(/(\d+):(\d+)(?::(\d+))?/);
+    if (match) {
+        return parseInt(match[1]) * 3600 + parseInt(match[2]) * 60 + (match[3] ? parseInt(match[3]) : 0);
+    }
+    return 0;
+}
