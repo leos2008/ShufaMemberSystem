@@ -676,14 +676,27 @@ function addRecharge() {
     if (student) {
         student.totalCount = (student.totalCount || 0) + pkg.count;
         student.remainingCount = (student.remainingCount || 0) + pkg.count;
-        renderStudents();
     } else {
-        // 学员不存在，提示用户
-        showNotification('续费成功，请在学员管理模块完善学员信息');
+        // 学员不存在，自动创建学员记录
+        const newStudent = {
+            id: Date.now(),
+            name: studentName,
+            age: 0,
+            school: '',
+            phone: '',
+            className: '',
+            packageName: packageName,
+            totalCount: pkg.count,
+            usedCount: 0,
+            remainingCount: pkg.count
+        };
+        data.students.push(newStudent);
+        showNotification('新学员已自动创建，请在学员管理模块完善信息');
     }
     
     saveData();
     renderRecharges();
+    renderStudents();
     
     document.querySelector('.modal').remove();
     showNotification('续费添加成功');
@@ -695,6 +708,8 @@ function renderRecharges() {
     
     data.recharges.forEach(recharge => {
         const tr = document.createElement('tr');
+        // 计算单次价格 = 实付金额 / 课时数
+        const unitPrice = recharge.count > 0 && recharge.totalAmount ? (recharge.totalAmount / recharge.count).toFixed(2) : '0.00';
         tr.innerHTML = `
             <td>${recharge.studentName}</td>
             <td>${recharge.packageName}</td>
@@ -702,6 +717,7 @@ function renderRecharges() {
             <td>¥${recharge.packageAmount?.toFixed(2) || '0.00'}</td>
             <td>¥${recharge.discount?.toFixed(2) || '0.00'}</td>
             <td style="font-weight: 600; color: var(--primary-color);">¥${recharge.totalAmount?.toFixed(2) || '0.00'}</td>
+            <td>¥${unitPrice}</td>
             <td>${recharge.date}</td>
             <td>${recharge.time}</td>
             <td>
@@ -1021,7 +1037,6 @@ function renderStudents() {
             <td>${student.school}</td>
             <td>${student.phone}</td>
             <td>${student.className}</td>
-            <td>${student.packageName}</td>
             <td>${student.totalCount}</td>
             <td>${student.usedCount}</td>
             <td>${student.remainingCount}</td>
