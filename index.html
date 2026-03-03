@@ -509,8 +509,19 @@
             <div class="module-header">
                 <h2>考勤扣课</h2>
             </div>
-            <div class="stats-info">
-                <p><strong>月度考勤统计：</strong>全体学员总考勤 <span id="total-attendance-count">0</span> 次 | 有考勤记录学员 <span id="attended-student-count">0</span> 人 | 总学员数 <span id="total-student-count">0</span> 人</p>
+            <div class="stats-info" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">全体学员总考勤</div>
+                    <div style="font-size: 24px; font-weight: 600; color: var(--primary-color);"><span id="total-attendance-count">0</span> 次</div>
+                </div>
+                <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">有考勤记录学员</div>
+                    <div style="font-size: 24px; font-weight: 600; color: #10b981;"><span id="attended-student-count">0</span> 人</div>
+                </div>
+                <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">总学员数</div>
+                    <div style="font-size: 24px; font-weight: 600; color: #8b5cf6;"><span id="total-student-count">0</span> 人</div>
+                </div>
             </div>
             <div class="action-bar">
                 <div class="search-group">
