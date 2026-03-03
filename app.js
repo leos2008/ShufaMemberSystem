@@ -1321,10 +1321,19 @@ function renderAttendance() {
             const timeDisplay = record.timestamp ? 
                 `<div style="font-size: 10px; opacity: 0.8; margin-top: 2px;">${new Date(record.timestamp).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})}</div>` : '';
             
+            // 构建 tooltip 内容
+            let tooltipContent = yearMonthDay;
+            if (record.timestamp) {
+                tooltipContent += ' ' + new Date(record.timestamp).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+            }
+            if (record.remark) {
+                tooltipContent += '\n备注：' + record.remark;
+            }
+            
             return `
                 <span class="tag tooltip" 
                       style="background: ${color}" 
-                      data-tooltip="${yearMonthDay}${record.timestamp ? ' ' + new Date(record.timestamp).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'}) : ''}"
+                      data-tooltip="${tooltipContent}"
                       onclick="event.stopPropagation(); showDeleteConfirm(${record.id}, '${student.name}')">
                     ${monthDay}
                     ${timeDisplay}
@@ -1485,6 +1494,10 @@ function showAddAttendanceModal(studentId) {
                 <label>选择日期</label>
                 <input type="date" id="attendance-date">
             </div>
+            <div class="form-group">
+                <label>备注</label>
+                <input type="text" id="attendance-remark" placeholder="请输入备注（可选）">
+            </div>
             <div class="modal-footer">
                 <button class="btn" onclick="this.closest('.modal').remove()">取消</button>
                 <button class="btn btn-primary" onclick="addAttendance(${student.id})">确定</button>
@@ -1517,12 +1530,14 @@ function addAttendance(studentId) {
     
     const now = new Date();
     const timestamp = now.getTime(); // 添加时间戳以支持同一天多次考勤
+    const remark = document.getElementById('attendance-remark').value.trim();
     
     const attendance = {
         id: Date.now(),
         studentName: student.name,
         date: dateStr,
-        timestamp: timestamp // 添加时间戳以区分同一天的多次考勤
+        timestamp: timestamp,
+        remark: remark
     };
     
     data.attendance.push(attendance);
