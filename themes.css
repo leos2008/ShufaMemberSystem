@@ -1,154 +1,116 @@
 /* ====================================
-   方案 1：CSS 变量主题切换
+   主题切换 - 4 套风格
    使用方法：在 body 标签上设置 data-theme 属性
    ==================================== */
 
-/* 默认主题 - 紫色梦幻 */
-:root {
-    --primary-color: #667eea;
-    --primary-dark: #5568d3;
-    --secondary-color: #764ba2;
-    --success-color: #48bb78;
-    --success-dark: #38a169;
-    --danger-color: #f56565;
-    --danger-dark: #e53e3e;
-    --warning-color: #ed8936;
-    --warning-dark: #dd6b20;
-    --info-color: #4299e1;
-    --info-dark: #3182ce;
-    --bg-gradient-start: #667eea;
-    --bg-gradient-end: #764ba2;
-    --text-primary: #333;
-    --text-secondary: #4a5568;
-    --border-color: #e2e8f0;
-    --hover-bg: #f7fafc;
+/* 默认主题 - 商务蓝 */
+:root, [data-theme="blue"] {
+    --primary-color: #1E88E5;
+    --primary-dark: #1565C0;
+    --primary-light: #BBDEFB;
+    --secondary-color: #42A5F5;
+    --success-color: #43A047;
+    --success-dark: #2E7D32;
+    --danger-color: #E53935;
+    --danger-dark: #C62828;
+    --warning-color: #FB8C00;
+    --warning-dark: #EF6C00;
+    --info-color: #1E88E5;
+    --info-dark: #1565C0;
+    --bg-gradient-start: #1E88E5;
+    --bg-gradient-end: #1565C0;
+    --text-primary: #212121;
+    --text-secondary: #616161;
+    --border-color: #E0E0E0;
+    --hover-bg: #E3F2FD;
+    --card-bg: #FFFFFF;
+    --header-bg: #1E88E5;
+    --header-text: #FFFFFF;
+    --sidebar-bg: #F5F5F5;
+    --table-header-bg: #E3F2FD;
+    --btn-hover: #1565C0;
 }
 
-/* 主题 2：蓝色海洋 */
-[data-theme="blue"] {
-    --primary-color: #3182ce;
-    --primary-dark: #2c5282;
-    --secondary-color: #2b6cb0;
-    --success-color: #38a169;
-    --success-dark: #2f855a;
-    --danger-color: #e53e3e;
-    --danger-dark: #c53030;
-    --warning-color: #dd6b20;
-    --warning-dark: #c05621;
-    --info-color: #3182ce;
-    --info-dark: #2c5282;
-    --bg-gradient-start: #667eea;
-    --bg-gradient-end: #764ba2;
-    --text-primary: #333;
-    --text-secondary: #4a5568;
-    --border-color: #e2e8f0;
-    --hover-bg: #f7fafc;
+/* 主题 2 - 党政红 */
+[data-theme="red"] {
+    --primary-color: #C62828;
+    --primary-dark: #B71C1C;
+    --primary-light: #FFCDD2;
+    --secondary-color: #D32F2F;
+    --success-color: #43A047;
+    --success-dark: #2E7D32;
+    --danger-color: #C62828;
+    --danger-dark: #B71C1C;
+    --warning-color: #F57C00;
+    --warning-dark: #E65100;
+    --info-color: #1976D2;
+    --info-dark: #1565C0;
+    --bg-gradient-start: #C62828;
+    --bg-gradient-end: #B71C1C;
+    --text-primary: #212121;
+    --text-secondary: #616161;
+    --border-color: #E0E0E0;
+    --hover-bg: #FFEBEE;
+    --card-bg: #FFFFFF;
+    --header-bg: #C62828;
+    --header-text: #FFFFFF;
+    --sidebar-bg: #FAFAFA;
+    --table-header-bg: #FFEBEE;
+    --btn-hover: #B71C1C;
 }
 
-/* 主题 3：绿色自然 */
-[data-theme="green"] {
-    --primary-color: #38a169;
-    --primary-dark: #2f855a;
-    --secondary-color: #48bb78;
-    --success-color: #48bb78;
-    --success-dark: #38a169;
-    --danger-color: #e53e3e;
-    --danger-dark: #c53030;
-    --warning-color: #dd6b20;
-    --warning-dark: #c05621;
-    --info-color: #3182ce;
-    --info-dark: #2c5282;
-    --bg-gradient-start: #56ab2f;
-    --bg-gradient-end: #a8e063;
-    --text-primary: #333;
-    --text-secondary: #4a5568;
-    --border-color: #e2e8f0;
-    --hover-bg: #f7fafc;
-}
-
-/* 主题 4：橙色活力 */
+/* 主题 3 - 活力橙 */
 [data-theme="orange"] {
-    --primary-color: #dd6b20;
-    --primary-dark: #c05621;
-    --secondary-color: #ed8936;
-    --success-color: #48bb78;
-    --success-dark: #38a169;
-    --danger-color: #f56565;
-    --danger-dark: #e53e3e;
-    --warning-color: #ed8936;
-    --warning-dark: #dd6b20;
-    --info-color: #4299e1;
-    --info-dark: #3182ce;
-    --bg-gradient-start: #f093fb;
-    --bg-gradient-end: #f5576c;
-    --text-primary: #333;
-    --text-secondary: #4a5568;
-    --border-color: #e2e8f0;
-    --hover-bg: #f7fafc;
+    --primary-color: #F44336;
+    --primary-dark: #D32F2F;
+    --primary-light: #FFCDD2;
+    --secondary-color: #FF5722;
+    --success-color: #4CAF50;
+    --success-dark: #388E3C;
+    --danger-color: #F44336;
+    --danger-dark: #D32F2F;
+    --warning-color: #FF9800;
+    --warning-dark: #F57C00;
+    --info-color: #2196F3;
+    --info-dark: #1976D2;
+    --bg-gradient-start: #F44336;
+    --bg-gradient-end: #D32F2F;
+    --text-primary: #212121;
+    --text-secondary: #616161;
+    --border-color: #E0E0E0;
+    --hover-bg: #FFEBEE;
+    --card-bg: #FFFFFF;
+    --header-bg: #F44336;
+    --header-text: #FFFFFF;
+    --sidebar-bg: #FAFAFA;
+    --table-header-bg: #FFEBEE;
+    --btn-hover: #D32F2F;
 }
 
-/* 主题 5：深色模式 */
-[data-theme="dark"] {
-    --primary-color: #63b3ed;
-    --primary-dark: #4299e1;
-    --secondary-color: #b794f4;
-    --success-color: #68d391;
-    --success-dark: #48bb78;
-    --danger-color: #fc8181;
-    --danger-dark: #f56565;
-    --warning-color: #f6ad55;
-    --warning-dark: #ed8936;
-    --info-color: #63b3ed;
-    --info-dark: #4299e1;
-    --bg-gradient-start: #2d3748;
-    --bg-gradient-end: #1a202c;
-    --text-primary: #f7fafc;
-    --text-secondary: #e2e8f0;
-    --border-color: #4a5568;
-    --hover-bg: #2d3748;
+/* 主题 4 - 清新绿 */
+[data-theme="green"] {
+    --primary-color: #43A047;
+    --primary-dark: #2E7D32;
+    --primary-light: #C8E6C9;
+    --secondary-color: #66BB6A;
+    --success-color: #43A047;
+    --success-dark: #2E7D32;
+    --danger-color: #E53935;
+    --danger-dark: #C62828;
+    --warning-color: #FFA000;
+    --warning-dark: #FF8F00;
+    --info-color: #039BE5;
+    --info-dark: #0277BD;
+    --bg-gradient-start: #43A047;
+    --bg-gradient-end: #2E7D32;
+    --text-primary: #212121;
+    --text-secondary: #616161;
+    --border-color: #E0E0E0;
+    --hover-bg: #E8F5E9;
+    --card-bg: #FFFFFF;
+    --header-bg: #43A047;
+    --header-text: #FFFFFF;
+    --sidebar-bg: #F5F5F5;
+    --table-header-bg: #E8F5E9;
+    --btn-hover: #2E7D32;
 }
-
-/* 主题 6：粉色浪漫 */
-[data-theme="pink"] {
-    --primary-color: #d53f8c;
-    --primary-dark: #b83280;
-    --secondary-color: #ed64a6;
-    --success-color: #48bb78;
-    --success-dark: #38a169;
-    --danger-color: #f56565;
-    --danger-dark: #e53e3e;
-    --warning-color: #ed8936;
-    --warning-dark: #dd6b20;
-    --info-color: #4299e1;
-    --info-dark: #3182ce;
-    --bg-gradient-start: #ff9a9e;
-    --bg-gradient-end: #fecfef;
-    --text-primary: #333;
-    --text-secondary: #4a5568;
-    --border-color: #e2e8f0;
-    --hover-bg: #f7fafc;
-}
-
-/* ====================================
-   方案 2：多套独立 CSS 文件切换
-   使用方法：动态替换 link 标签的 href
-   ==================================== */
-/* 这个方案需要创建多个 CSS 文件：
-   - theme-purple.css (默认)
-   - theme-blue.css
-   - theme-green.css
-   - theme-orange.css
-   - theme-dark.css
-   - theme-pink.css
-*/
-
-/* ====================================
-   方案 3：CSS 类名前缀切换
-   使用方法：在 body 标签上添加主题类名
-   ==================================== */
-/* 
-   .theme-purple body { ... }
-   .theme-blue body { ... }
-   .theme-green body { ... }
-   等...
-*/
