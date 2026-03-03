@@ -1426,6 +1426,7 @@ function filterAttendance() {
     const attendedStudentsSet = new Set(filterMonthRecords.map(r => r.studentName));
     const attendedStudents = filterNamesStudents.filter(s => attendedStudentsSet.has(s.name));
     
+    document.getElementById('attendance-month-display').textContent = `${filterYear}年${filterMonth}月`;
     document.getElementById('total-attendance-count').textContent = filterMonthRecords.length;
     document.getElementById('attended-student-count').textContent = attendedStudents.length;
     document.getElementById('total-student-count').textContent = filterNamesStudents.length;
@@ -1803,6 +1804,7 @@ function updateStats() {
     
     const attendedStudents = new Set(currentMonthRecords.map(r => r.studentName));
     
+    document.getElementById('attendance-month-display').textContent = `${currentYear}年${currentMonth}月`;
     document.getElementById('total-attendance-count').textContent = currentMonthRecords.length;
     document.getElementById('attended-student-count').textContent = attendedStudents.size;
     document.getElementById('total-student-count').textContent = data.students.length;
