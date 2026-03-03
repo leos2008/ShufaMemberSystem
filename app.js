@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 加载主题
 function loadTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'purple';
+    const savedTheme = localStorage.getItem('theme') || 'toutiao';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeSelector(savedTheme);
 }
