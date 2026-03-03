@@ -1886,67 +1886,66 @@ function calculateSettlement() {
     
     const [year, month] = monthStr.split('-').map(Number);
     
-    // 计算上一个月
-    let prevMonth = month - 1;
-    let prevYear = year;
-    if (prevMonth <= 0) {
-        prevMonth = 12;
-        prevYear = year - 1;
-    }
-    
     const tbody = document.getElementById('settlement-table-body');
     tbody.innerHTML = '';
     
     let totalAmount = 0;
     let studentCount = 0;
+    let displayIndex = 0;
     
-    // Debug: console.log all recharges for debugging
-    console.log('=== 结算调试信息 ===');
-    console.log('结算月份:', prevYear, '年', prevMonth, '月');
-    console.log('学员数量:', data.students.length);
-    console.log('充值记录数量:', data.recharges.length);
-    console.log('考勤记录数量:', data.attendance.length);
+    // 过滤出当月有消课的学员
+    const studentsWithAttendance = data.students.filter(student => {
+        const monthRecords = data.attendance.filter(a => {
+            const recordDate = new Date(a.date);
+            return a.studentName === student.name && 
+                   recordDate.getFullYear() === year && 
+                   recordDate.getMonth() + 1 === month;
+        });
+        return monthRecords.length > 0;
+    });
     
     // Show message if no data
-    if (data.students.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999; padding: 20px;">暂无学员数据，请先在学员管理或续费充值模块添加数据</td></tr>';
-        document.getElementById('settlement-month-display').textContent = `${prevYear}年${prevMonth}月`;
+    if (studentsWithAttendance.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999; padding: 20px;">本月暂无消课数据</td></tr>';
+        document.getElementById('settlement-month-display').textContent = `${year}年${month}月`;
         document.getElementById('settlement-student-count').textContent = '0';
         document.getElementById('settlement-total-amount').textContent = '¥0';
         return;
     }
     
-    data.students.forEach((student, index) => {
-        // 获取上月的考勤记录
-        const prevMonthRecords = data.attendance.filter(a => {
+    studentsWithAttendance.forEach((student) => {
+        // 获取当月（选择的月份）的考勤记录
+        const monthRecords = data.attendance.filter(a => {
             const recordDate = new Date(a.date);
             return a.studentName === student.name && 
-                   recordDate.getFullYear() === prevYear && 
-                   recordDate.getMonth() + 1 === prevMonth;
+                   recordDate.getFullYear() === year && 
+                   recordDate.getMonth() + 1 === month;
         });
         
-        const consumedCount = prevMonthRecords.length;
+        const consumedCount = monthRecords.length;
         
         // 计算消课费用 - 先充先消逻辑
-        const cost = calculateConsumptionCost(student.name, prevYear, prevMonth, consumedCount);
+        const cost = calculateConsumptionCost(student.name, year, month, consumedCount);
         
         totalAmount += cost;
         studentCount++;
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${index + 1}</td>
+            <td>${displayIndex + 1}</td>
             <td>${student.name}</td>
             <td>${student.totalCount || 0}</td>
             <td>${consumedCount}</td>
             <td style="font-weight: 600; color: #ef4444;">¥${cost.toFixed(2)}</td>
-            <td style="font-weight: 600; color: ${getRemainingColor((student.remainingCount || 0) / (student.totalCount || 1))};">${student.remainingCount || 0}</td>
+            <td style="font-weight: 600; color: ${getRemainingColor((student.remainingCount || 0) / ((student.totalCount || 1) > 0 ? student.totalCount : 1))};">${student.remainingCount || 0}</td>
+            <td><button class="btn btn-info" onclick="showSettlementDetail('${student.name}', ${year}, ${month}, ${consumedCount})">查看明细</button></td>
         `;
         tbody.appendChild(tr);
+        displayIndex++;
     });
     
     // 更新统计信息
-    document.getElementById('settlement-month-display').textContent = `${prevYear}年${prevMonth}月`;
+    document.getElementById('settlement-month-display').textContent = `${year}年${month}月`;
     document.getElementById('settlement-student-count').textContent = studentCount;
     document.getElementById('settlement-total-amount').textContent = `¥${totalAmount.toFixed(2)}`;
 }
@@ -2000,6 +1999,102 @@ function calculateConsumptionCost(studentName, year, month, consumedCount) {
     return totalCost;
 }
 
+function showSettlementDetail(studentName, year, month, consumedCount) {
+    const recharges = data.recharges
+        .filter(r => r.studentName === studentName)
+        .sort((a, b) => {
+            const dateStrA = a.date + ' ' + (a.time || '00:00:00');
+            const dateStrB = b.date + ' ' + (b.time || '00:00:00');
+            const dateA = new Date(dateStrA);
+            const dateB = new Date(dateStrB);
+            return dateA - dateB;
+        });
+    
+    let availableClasses = [];
+    if (recharges.length > 0) {
+        recharges.forEach(r => {
+            const unitPrice = r.count > 0 && r.totalAmount ? r.totalAmount / r.count : 0;
+            const dateStr = r.date + ' ' + (r.time || '00:00:00');
+            const dateObj = new Date(dateStr);
+            const dateFormatted = dateObj.getFullYear() + '-' + 
+                String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(dateObj.getDate()).padStart(2, '0');
+            for (let i = 0; i < r.count; i++) {
+                availableClasses.push({
+                    unitPrice: unitPrice,
+                    date: dateStr,
+                    dateFormatted: dateFormatted,
+                    rechargeCount: r.count,
+                    rechargeTotal: r.totalAmount
+                });
+            }
+        });
+        
+        availableClasses.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+    
+    const monthRecords = data.attendance.filter(a => {
+        const recordDate = new Date(a.date);
+        return a.studentName === studentName && 
+               recordDate.getFullYear() === year && 
+               recordDate.getMonth() + 1 === month;
+    });
+    
+    const sortedRecords = [...monthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    let detailHtml = '<div style="max-height: 400px; overflow-y: auto;">';
+    detailHtml += `<h4 style="margin-bottom: 15px;">${studentName} - ${year}年${month}月结算明细</h4>`;
+    detailHtml += '<table style="width: 100%; border-collapse: collapse; font-size: 14px;">';
+    detailHtml += '<tr style="background: var(--hover-bg);"><th style="padding: 8px; border: 1px solid #ddd;">序号</th><th style="padding: 8px; border: 1px solid #ddd;">扣费课次</th><th style="padding: 8px; border: 1px solid #ddd;">对应充值</th><th style="padding: 8px; border: 1px solid #ddd;">单价</th><th style="padding: 8px; border: 1px solid #ddd;">费用</th></tr>';
+    
+    let totalCost = 0;
+    
+    if (sortedRecords.length === 0) {
+        detailHtml += `<tr><td colspan="5" style="padding: 20px; border: 1px solid #ddd; text-align: center; color: #999;">本月暂无考勤记录</td></tr>`;
+    } else if (recharges.length === 0) {
+        detailHtml += `<tr><td colspan="5" style="padding: 20px; border: 1px solid #ddd; text-align: center; color: #999;">该学员暂无充值记录，无法计算费用</td></tr>`;
+    } else {
+        for (let i = 0; i < sortedRecords.length && i < availableClasses.length; i++) {
+            const cls = availableClasses[i];
+            const cost = cls.unitPrice;
+            totalCost += cost;
+            const recordDate = new Date(sortedRecords[i].date);
+            const dateStr = recordDate.getFullYear() + '-' + 
+                String(recordDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(recordDate.getDate()).padStart(2, '0');
+            
+            detailHtml += `<tr>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${i + 1}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${dateStr}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${cls.dateFormatted} 充值${cls.rechargeCount}次</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">¥${cls.unitPrice.toFixed(2)}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #ef4444; font-weight: 600;">¥${cost.toFixed(2)}</td>
+            </tr>`;
+        }
+    }
+    
+    detailHtml += `<tr style="background: #fef3c7;">
+        <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">本月消耗费用合计：</td>
+        <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #ef4444; font-size: 16px;">¥${totalCost.toFixed(2)}</td>
+    </tr>`;
+    detailHtml += '</table></div>';
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content" style="min-width: 700px; max-width: 800px;">
+            <div class="modal-header">
+                <h3>结算明细</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+            </div>
+            <div style="margin-top: 15px;">
+                ${detailHtml}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
 // 初始化月度结算模块
 function initSettlementModule() {
     // 填充班级选择框
@@ -2014,15 +2109,11 @@ function initSettlementModule() {
         });
     }
     
-    // 默认选择上个月
+    // 默认选择当月
     const now = new Date();
-    let prevMonth = now.getMonth();
-    let prevYear = now.getFullYear();
-    if (prevMonth <= 0) {
-        prevMonth = 12;
-        prevYear -= 1;
-    }
-    const monthStr = prevYear + '-' + String(prevMonth).padStart(2, '0');
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const monthStr = year + '-' + String(month).padStart(2, '0');
     document.getElementById('settlement-month').value = monthStr;
 }
 

@@ -599,7 +599,7 @@
                     <div style="font-size: 18px; font-weight: 600; color: var(--primary-color);" id="settlement-month-display">-</div>
                 </div>
                 <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">结算学员数</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">消课学员数</div>
                     <div style="font-size: 24px; font-weight: 600; color: #10b981;" id="settlement-student-count">0</div>
                 </div>
                 <div class="stat-card" style="background: var(--hover-bg); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px;">
@@ -613,9 +613,10 @@
                         <th onclick="sortTable('settlement-table-body', 0, 'number')">学员编号 <span class="sort-icon">⇅</span></th>
                         <th onclick="sortTable('settlement-table-body', 1, 'string')">姓名 <span class="sort-icon">⇅</span></th>
                         <th onclick="sortTable('settlement-table-body', 2, 'number')">总课时 <span class="sort-icon">⇅</span></th>
-                        <th onclick="sortTable('settlement-table-body', 3, 'number')">上月消耗课时 <span class="sort-icon">⇅</span></th>
-                        <th onclick="sortTable('settlement-table-body', 4, 'number')">上月消耗课时费用 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('settlement-table-body', 3, 'number')">本月消耗课时 <span class="sort-icon">⇅</span></th>
+                        <th onclick="sortTable('settlement-table-body', 4, 'number')">本月消耗课时费用 <span class="sort-icon">⇅</span></th>
                         <th onclick="sortTable('settlement-table-body', 5, 'number')">剩余课时 <span class="sort-icon">⇅</span></th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="settlement-table-body">
