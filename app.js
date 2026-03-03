@@ -84,7 +84,7 @@ function loadData() {
                 sortedRecharges.forEach(r => {
                     if (!r.rechargeSeq) {
                         maxSeq++;
-                        r.rechargeSeq = 'CZ-' + String(maxSeq).padStart(3, '0');
+                        r.rechargeSeq = 'CZ-' + String(maxSeq).padStart(6, '0');
                         hasNewSeq = true;
                     }
                 });
@@ -706,7 +706,7 @@ function addRecharge() {
                 return match ? parseInt(match[1]) : 0;
             })
             .reduce((max, curr) => Math.max(max, curr), 0);
-        rechargeSeq = String(maxSeq + 1).padStart(3, '0');
+        rechargeSeq = String(maxSeq + 1).padStart(6, '0');
     }
     
     const recharge = {
@@ -848,8 +848,8 @@ function showEditRechargeModal(id) {
                 <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
             </div>
             <div class="form-group">
-                <label>充值序号（如 CZ-001）</label>
-                <input type="text" id="edit-recharge-seq" value="${recharge.rechargeSeq || ''}" placeholder="格式: CZ-001">
+                <label>充值序号（如 CZ000001）</label>
+                <input type="text" id="edit-recharge-seq" value="${recharge.rechargeSeq || ''}" placeholder="格式: CZ-000001">
             </div>
             <div class="form-group">
                 <label>学员姓名</label>
@@ -2108,6 +2108,7 @@ function showSettlementDetail(studentName, year, month, consumedCount) {
                     unitPrice: unitPrice,
                     date: dateStr,
                     dateFormatted: dateFormatted,
+                    rechargeSeq: r.rechargeSeq || '',
                     rechargeCount: r.count,
                     rechargeTotal: r.totalAmount
                 });
@@ -2129,14 +2130,14 @@ function showSettlementDetail(studentName, year, month, consumedCount) {
     let detailHtml = '<div style="max-height: 400px; overflow-y: auto;">';
     detailHtml += `<h4 style="margin-bottom: 15px;">${studentName} - ${year}年${month}月结算明细</h4>`;
     detailHtml += '<table style="width: 100%; border-collapse: collapse; font-size: 14px;">';
-    detailHtml += '<tr style="background: var(--hover-bg);"><th style="padding: 8px; border: 1px solid #ddd;">序号</th><th style="padding: 8px; border: 1px solid #ddd;">扣费课次</th><th style="padding: 8px; border: 1px solid #ddd;">对应充值</th><th style="padding: 8px; border: 1px solid #ddd;">单价</th><th style="padding: 8px; border: 1px solid #ddd;">费用</th></tr>';
+    detailHtml += '<tr style="background: var(--hover-bg);"><th style="padding: 8px; border: 1px solid #ddd;">序号</th><th style="padding: 8px; border: 1px solid #ddd;">扣费课次</th><th style="padding: 8px; border: 1px solid #ddd;">对应充值序号</th><th style="padding: 8px; border: 1px solid #ddd;">充值金额</th><th style="padding: 8px; border: 1px solid #ddd;">单价</th><th style="padding: 8px; border: 1px solid #ddd;">费用</th></tr>';
     
     let totalCost = 0;
     
     if (sortedRecords.length === 0) {
         detailHtml += `<tr><td colspan="5" style="padding: 20px; border: 1px solid #ddd; text-align: center; color: #999;">本月暂无考勤记录</td></tr>`;
     } else if (recharges.length === 0) {
-        detailHtml += `<tr><td colspan="5" style="padding: 20px; border: 1px solid #ddd; text-align: center; color: #999;">该学员暂无充值记录，无法计算费用</td></tr>`;
+        detailHtml += `<tr><td colspan="6" style="padding: 20px; border: 1px solid #ddd; text-align: center; color: #999;">该学员暂无充值记录，无法计算费用</td></tr>`;
     } else {
         for (let i = 0; i < sortedRecords.length && i < availableClasses.length; i++) {
             const cls = availableClasses[i];
@@ -2150,7 +2151,8 @@ function showSettlementDetail(studentName, year, month, consumedCount) {
             detailHtml += `<tr>
                 <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${i + 1}</td>
                 <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${dateStr}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${cls.dateFormatted} 充值${cls.rechargeCount}次</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${cls.rechargeSeq}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">¥${(cls.rechargeTotal || 0).toFixed(2)}</td>
                 <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">¥${cls.unitPrice.toFixed(2)}</td>
                 <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #ef4444; font-weight: 600;">¥${cost.toFixed(2)}</td>
             </tr>`;
@@ -2158,7 +2160,7 @@ function showSettlementDetail(studentName, year, month, consumedCount) {
     }
     
     detailHtml += `<tr style="background: #fef3c7;">
-        <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">本月消耗费用合计：</td>
+        <td colspan="5" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">本月消耗费用合计：</td>
         <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #ef4444; font-size: 16px;">¥${totalCost.toFixed(2)}</td>
     </tr>`;
     detailHtml += '</table></div>';
