@@ -61,6 +61,33 @@ function loadData() {
         const savedData = localStorage.getItem('shufaMemberSystem');
         if (savedData) {
             data = JSON.parse(savedData);
+            
+            // 为现有充值记录自动生成充值序号
+            if (data.recharges && data.recharges.length > 0) {
+                const students = [...new Set(data.recharges.map(r => r.studentName))];
+                let hasNewSeq = false;
+                students.forEach(studentName => {
+                    const studentRecharges = data.recharges
+                        .filter(r => r.studentName === studentName)
+                        .sort((a, b) => {
+                            const dateStrA = a.date + ' ' + (a.time || '00:00:00');
+                            const dateStrB = b.date + ' ' + (b.time || '00:00:00');
+                            return new Date(dateStrA) - new Date(dateStrB);
+                        });
+                    
+                    studentRecharges.forEach((r, index) => {
+                        if (!r.rechargeSeq) {
+                            r.rechargeSeq = 'CZ-' + String(index + 1).padStart(3, '0');
+                            hasNewSeq = true;
+                        }
+                    });
+                });
+                
+                // 如果生成了新序号，保存数据
+                if (hasNewSeq) {
+                    saveData();
+                }
+            }
         }
     } catch (e) {
         console.error('加载数据失败:', e);
@@ -664,6 +691,19 @@ function addRecharge() {
     }
     
     const now = new Date();
+    // 生成充值序号 CZ-***
+    const existingRecharges = data.recharges.filter(r => r.studentName === studentName);
+    let rechargeSeq = '001';
+    if (existingRecharges.length > 0) {
+        const maxSeq = existingRecharges
+            .map(r => {
+                const match = r.rechargeSeq?.match(/CZ-(\d+)/);
+                return match ? parseInt(match[1]) : 0;
+            })
+            .reduce((max, curr) => Math.max(max, curr), 0);
+        rechargeSeq = String(maxSeq + 1).padStart(3, '0');
+    }
+    
     const recharge = {
         id: Date.now(),
         studentName: studentName,
@@ -673,6 +713,7 @@ function addRecharge() {
         discount: discount,
         platformFee: parseFloat(document.getElementById('recharge-platform-fee').value) || 0,
         totalAmount: totalAmount,
+        rechargeSeq: 'CZ-' + rechargeSeq,
         date: now.toLocaleDateString('zh-CN'),
         time: now.toLocaleTimeString('zh-CN')
     };
@@ -719,6 +760,7 @@ function renderRecharges() {
         // 计算单次价格 = 实付金额 / 课时数
         const unitPrice = recharge.count > 0 && recharge.totalAmount ? (recharge.totalAmount / recharge.count).toFixed(2) : '0.00';
         tr.innerHTML = `
+            <td>${recharge.rechargeSeq || '-'}</td>
             <td>${recharge.studentName}</td>
             <td>${recharge.packageName}</td>
             <td>${recharge.count} 课时</td>
@@ -799,6 +841,10 @@ function showEditRechargeModal(id) {
             <div class="modal-header">
                 <h3>修改续费记录</h3>
                 <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+            </div>
+            <div class="form-group">
+                <label>充值序号（如 CZ-001）</label>
+                <input type="text" id="edit-recharge-seq" value="${recharge.rechargeSeq || ''}" placeholder="格式: CZ-001">
             </div>
             <div class="form-group">
                 <label>学员姓名</label>
@@ -886,6 +932,7 @@ function calculateEditRechargeTotal() {
 
 function editRecharge(id) {
     const studentName = document.getElementById('edit-recharge-student').value.trim();
+    const rechargeSeq = document.getElementById('edit-recharge-seq').value.trim();
     const packageName = document.getElementById('edit-recharge-package').value;
     const count = parseInt(document.getElementById('edit-recharge-count').value);
     const packageAmount = parseFloat(document.getElementById('edit-recharge-package-amount').value);
@@ -906,6 +953,7 @@ function editRecharge(id) {
         const oldCount = recharge.count;
         
         // 更新续费记录
+        recharge.rechargeSeq = rechargeSeq || null;
         recharge.studentName = studentName;
         recharge.packageName = packageName;
         recharge.count = count;
@@ -1953,10 +2001,21 @@ function calculateSettlement() {
 function calculateConsumptionCost(studentName, year, month, consumedCount) {
     if (consumedCount <= 0) return 0;
     
-    // Get all recharge records for this student, sorted by date
+    // Get all recharge records for this student, sorted by rechargeSeq first, then by date
     const recharges = data.recharges
         .filter(r => r.studentName === studentName)
         .sort((a, b) => {
+            // 优先按充值序号排序
+            const seqA = a.rechargeSeq ? parseInt(a.rechargeSeq.replace(/\D/g, '')) || 0 : null;
+            const seqB = b.rechargeSeq ? parseInt(b.rechargeSeq.replace(/\D/g, '')) || 0 : null;
+            
+            if (seqA !== null && seqB !== null) {
+                return seqA - seqB;
+            }
+            if (seqA !== null) return -1;
+            if (seqB !== null) return 1;
+            
+            // 如果没有充值序号，按日期排序
             const dateStrA = a.date + ' ' + (a.time || '00:00:00');
             const dateStrB = b.date + ' ' + (b.time || '00:00:00');
             const dateA = new Date(dateStrA);
@@ -2003,6 +2062,17 @@ function showSettlementDetail(studentName, year, month, consumedCount) {
     const recharges = data.recharges
         .filter(r => r.studentName === studentName)
         .sort((a, b) => {
+            // 优先按充值序号排序
+            const seqA = a.rechargeSeq ? parseInt(a.rechargeSeq.replace(/\D/g, '')) || 0 : null;
+            const seqB = b.rechargeSeq ? parseInt(b.rechargeSeq.replace(/\D/g, '')) || 0 : null;
+            
+            if (seqA !== null && seqB !== null) {
+                return seqA - seqB;
+            }
+            if (seqA !== null) return -1;
+            if (seqB !== null) return 1;
+            
+            // 如果没有充值序号，按日期排序
             const dateStrA = a.date + ' ' + (a.time || '00:00:00');
             const dateStrB = b.date + ' ' + (b.time || '00:00:00');
             const dateA = new Date(dateStrA);
