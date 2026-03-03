@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学员管理系统</title>
+    <link rel="stylesheet" href="themes.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 32px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .module {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .module.active {
+            display: block;
+        }
+
+        .module-header {
+            margin-bottom: 20px;
+        }
+
+        .module-header h2 {
+            color: var(--text-primary);
+            font-size: 24px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-dark);
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: var(--warning-dark);
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: var(--info-dark);
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--hover-bg);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: var(--hover-bg);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            min-width: 400px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: var(--text-primary);
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
+        }
+
+        .tag-delete {
+            margin-left: 5px;
+            color: white;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .stats-info {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stats-info p {
+            margin: 5px 0;
+        }
+
+        .search-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #48bb78;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        /* 主题卡片激活状态 */
+        .theme-card.active {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3) !important;
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 学员管理系统</h1>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-module="package">课包管理</button>
+            <button class="nav-tab" data-module="class">班级管理</button>
+            <button class="nav-tab" data-module="recharge">续费充值</button>
+            <button class="nav-tab" data-module="student">学员管理</button>
+            <button class="nav-tab" data-module="attendance">考勤扣课</button>
+            <button class="nav-tab" data-module="backup">数据备份</button>
+        </div>
+
+        <!-- 课包管理模块 -->
+        <div id="package-module" class="module active">
+            <div class="module-header">
+                <h2>课包管理</h2>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="showAddPackageModal()">+ 添加课包</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>课包名称</th>
+                        <th>课时数</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="package-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 班级管理模块 -->
+        <div id="class-module" class="module">
+            <div class="module-header">
+                <h2>班级管理</h2>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="showAddClassModal()">+ 添加班级</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>班级名称</th>
+                        <th>上课时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="class-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 续费充值模块 -->
+        <div id="recharge-module" class="module">
+            <div class="module-header">
+                <h2>续费充值</h2>
+            </div>
+            <div class="action-bar">
+                <div class="search-group">
+                    <input type="text" id="recharge-search-name" placeholder="学员姓名">
+                    <input type="text" id="recharge-search-package" placeholder="课包名称">
+                    <button class="btn btn-info" onclick="searchRecharges()">查询</button>
+                </div>
+                <button class="btn btn-primary" onclick="showAddRechargeModal()">+ 添加续费</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>课包名称</th>
+                        <th>新增课时数</th>
+                        <th>充值日期</th>
+                        <th>充值时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="recharge-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 学员管理模块 -->
+        <div id="student-module" class="module">
+            <div class="module-header">
+                <h2>学员管理</h2>
+            </div>
+            <div class="action-bar">
+                <div class="search-group">
+                    <input type="text" id="student-search-name" placeholder="姓名">
+                    <input type="number" id="student-search-age" placeholder="年龄" style="width: 80px;">
+                    <input type="text" id="student-search-school" placeholder="学校">
+                    <input type="text" id="student-search-phone" placeholder="电话">
+                    <select id="student-search-class">
+                        <option value="">全部班级</option>
+                    </select>
+                    <button class="btn btn-info" onclick="searchStudents()">查询</button>
+                </div>
+                <button class="btn btn-primary" onclick="showAddStudentModal()">+ 添加学员</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>年龄</th>
+                        <th>学校</th>
+                        <th>电话</th>
+                        <th>班级</th>
+                        <th>初始课包</th>
+                        <th>总课时</th>
+                        <th>已消耗</th>
+                        <th>剩余</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="student-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 考勤扣课模块 -->
+        <div id="attendance-module" class="module">
+            <div class="module-header">
+                <h2>考勤扣课</h2>
+            </div>
+            <div class="stats-info">
+                <p><strong>月度考勤统计：</strong>全体学员总考勤 <span id="total-attendance-count">0</span> 次 | 有考勤记录学员 <span id="attended-student-count">0</span> 人 | 总学员数 <span id="total-student-count">0</span> 人</p>
+            </div>
+            <div class="action-bar">
+                <div class="search-group">
+                    <select id="attendance-filter-class">
+                        <option value="">全部班级</option>
+                    </select>
+                    <input type="text" id="attendance-filter-name" placeholder="学员姓名">
+                    <input type="month" id="attendance-filter-month">
+                    <button class="btn btn-info" onclick="filterAttendance()">筛选</button>
+                    <button class="btn btn-success" onclick="generateMonthlyReport()">生成月度报告</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>班级</th>
+                        <th>当月考勤日期</th>
+                        <th>当月次数</th>
+                        <th>剩余课时</th>
+                        <th>上月考勤次数</th>
+                        <th>上上月考勤次数</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 数据备份模块 -->
+        <div id="backup-module" class="module">
+            <div class="module-header">
+                <h2>数据备份</h2>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-success" onclick="exportData()">导出数据</button>
+                <button class="btn btn-warning" onclick="document.getElementById('import-file').click()">导入数据</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(this)">
+            </div>
+            <div style="padding: 20px; background: #f7fafc; border-radius: 8px; margin-bottom: 20px;">
+                <h3>使用说明</h3>
+                <p style="margin-top: 10px; color: #666;">
+                    1. 点击"导出数据"可将当前所有数据导出为 JSON 文件<br>
+                    2. 点击"导入数据"可选择之前导出的 JSON 文件进行数据恢复<br>
+                    3. 导入数据会覆盖当前所有数据，请谨慎操作
+                </p>
+            </div>
+
+            <!-- 换肤功能区域 -->
+            <div style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+                <h3 style="margin-bottom: 20px; color: var(--text-primary);">🎨 主题设置</h3>
+                
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 25px; flex-wrap: wrap;">
+                    <label style="font-weight: 600; color: var(--text-secondary);">快速选择：</label>
+                    <select id="theme-select" onchange="changeTheme(this.value)" style="padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; cursor: pointer;">
+                        <option value="purple">💜 紫色梦幻</option>
+                        <option value="blue">💙 蓝色海洋</option>
+                        <option value="green">💚 绿色自然</option>
+                        <option value="orange">🧡 橙色活力</option>
+                        <option value="pink">💗 粉色浪漫</option>
+                        <option value="dark">🌙 深色模式</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <p style="margin-bottom: 15px; font-weight: 600; color: var(--text-secondary);">主题预览：</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+                        <div class="theme-card" onclick="changeTheme('purple')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #667eea, #764ba2); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">💜 紫色梦幻</div>
+                            <div style="font-size: 12px; opacity: 0.9;">默认主题 · 优雅梦幻</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('blue')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #667eea, #3182ce); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">💙 蓝色海洋</div>
+                            <div style="font-size: 12px; opacity: 0.9;">商务专业 · 清爽舒适</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('green')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #56ab2f, #a8e063); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">💚 绿色自然</div>
+                            <div style="font-size: 12px; opacity: 0.9;">清新活力 · 健康向上</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('orange')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #f093fb, #f5576c); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">🧡 橙色活力</div>
+                            <div style="font-size: 12px; opacity: 0.9;">热情活泼 · 充满能量</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('pink')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #ff9a9e, #fecfef); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">💗 粉色浪漫</div>
+                            <div style="font-size: 12px; opacity: 0.9;">温馨浪漫 · 甜美可爱</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('dark')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #2d3748, #1a202c); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">🌙 深色模式</div>
+                            <div style="font-size: 12px; opacity: 0.9;">护眼舒适 · 夜间友好</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 15px; background: var(--hover-bg); border-radius: 8px; border-left: 4px solid var(--info-color);">
+                    <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">
+                        <strong>💡 提示：</strong>选择的主题会自动保存，下次访问时自动应用。随时可以切换回其他主题。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
