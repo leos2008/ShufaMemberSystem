@@ -1,116 +1,172 @@
 /* ====================================
-   主题切换 - 4 套风格
+   主题切换 - 6 套风格
    使用方法：在 body 标签上设置 data-theme 属性
    ==================================== */
 
 /* 默认主题 - 商务蓝 */
 :root, [data-theme="blue"] {
-    --primary-color: #1E88E5;
-    --primary-dark: #1565C0;
-    --primary-light: #BBDEFB;
-    --secondary-color: #42A5F5;
-    --success-color: #43A047;
-    --success-dark: #2E7D32;
+    --primary-color: #1E40AF;
+    --primary-dark: #3B82F6;
+    --primary-light: #60A5FA;
+    --secondary-color: #93C5FD;
+    --success-color: #4CAF50;
+    --success-dark: #388E3C;
     --danger-color: #E53935;
     --danger-dark: #C62828;
     --warning-color: #FB8C00;
     --warning-dark: #EF6C00;
-    --info-color: #1E88E5;
-    --info-dark: #1565C0;
-    --bg-gradient-start: #1E88E5;
-    --bg-gradient-end: #1565C0;
-    --text-primary: #212121;
-    --text-secondary: #616161;
-    --border-color: #E0E0E0;
-    --hover-bg: #E3F2FD;
+    --info-color: #3B82F6;
+    --info-dark: #1E40AF;
+    --bg-gradient-start: #1E40AF;
+    --bg-gradient-end: #3B82F6;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --hover-bg: #DBEAFE;
     --card-bg: #FFFFFF;
-    --header-bg: #1E88E5;
+    --header-bg: #1E40AF;
     --header-text: #FFFFFF;
-    --sidebar-bg: #F5F5F5;
-    --table-header-bg: #E3F2FD;
-    --btn-hover: #1565C0;
+    --sidebar-bg: #F9FAFB;
+    --table-header-bg: #DBEAFE;
+    --btn-hover: #1E3A8A;
 }
 
-/* 主题 2 - 党政红 */
-[data-theme="red"] {
-    --primary-color: #C62828;
-    --primary-dark: #B71C1C;
-    --primary-light: #FFCDD2;
-    --secondary-color: #D32F2F;
-    --success-color: #43A047;
-    --success-dark: #2E7D32;
-    --danger-color: #C62828;
-    --danger-dark: #B71C1C;
-    --warning-color: #F57C00;
-    --warning-dark: #E65100;
-    --info-color: #1976D2;
-    --info-dark: #1565C0;
-    --bg-gradient-start: #C62828;
-    --bg-gradient-end: #B71C1C;
-    --text-primary: #212121;
-    --text-secondary: #616161;
-    --border-color: #E0E0E0;
-    --hover-bg: #FFEBEE;
-    --card-bg: #FFFFFF;
-    --header-bg: #C62828;
-    --header-text: #FFFFFF;
-    --sidebar-bg: #FAFAFA;
-    --table-header-bg: #FFEBEE;
-    --btn-hover: #B71C1C;
-}
-
-/* 主题 3 - 活力橙 */
-[data-theme="orange"] {
-    --primary-color: #F44336;
-    --primary-dark: #D32F2F;
-    --primary-light: #FFCDD2;
-    --secondary-color: #FF5722;
+/* 主题 2 - 玫瑰红 */
+[data-theme="rose"] {
+    --primary-color: #BE185D;
+    --primary-dark: #E11D48;
+    --primary-light: #F43F5E;
+    --secondary-color: #FB7185;
     --success-color: #4CAF50;
     --success-dark: #388E3C;
-    --danger-color: #F44336;
-    --danger-dark: #D32F2F;
-    --warning-color: #FF9800;
-    --warning-dark: #F57C00;
-    --info-color: #2196F3;
-    --info-dark: #1976D2;
-    --bg-gradient-start: #F44336;
-    --bg-gradient-end: #D32F2F;
-    --text-primary: #212121;
-    --text-secondary: #616161;
-    --border-color: #E0E0E0;
-    --hover-bg: #FFEBEE;
+    --danger-color: #BE185D;
+    --danger-dark: #9D174D;
+    --warning-color: #F59E0B;
+    --warning-dark: #D97706;
+    --info-color: #E11D48;
+    --info-dark: #BE185D;
+    --bg-gradient-start: #BE185D;
+    --bg-gradient-end: #E11D48;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --hover-bg: #FECDD3;
     --card-bg: #FFFFFF;
-    --header-bg: #F44336;
+    --header-bg: #BE185D;
     --header-text: #FFFFFF;
-    --sidebar-bg: #FAFAFA;
-    --table-header-bg: #FFEBEE;
-    --btn-hover: #D32F2F;
+    --sidebar-bg: #F9FAFB;
+    --table-header-bg: #FECDD3;
+    --btn-hover: #9D174D;
 }
 
-/* 主题 4 - 清新绿 */
+/* 主题 3 - 清新绿 */
 [data-theme="green"] {
-    --primary-color: #43A047;
-    --primary-dark: #2E7D32;
-    --primary-light: #C8E6C9;
-    --secondary-color: #66BB6A;
-    --success-color: #43A047;
-    --success-dark: #2E7D32;
+    --primary-color: #07C160;
+    --primary-dark: #4CAF50;
+    --primary-light: #66BB6A;
+    --secondary-color: #81C784;
+    --success-color: #07C160;
+    --success-dark: #059669;
     --danger-color: #E53935;
     --danger-dark: #C62828;
     --warning-color: #FFA000;
     --warning-dark: #FF8F00;
-    --info-color: #039BE5;
-    --info-dark: #0277BD;
-    --bg-gradient-start: #43A047;
-    --bg-gradient-end: #2E7D32;
-    --text-primary: #212121;
-    --text-secondary: #616161;
-    --border-color: #E0E0E0;
-    --hover-bg: #E8F5E9;
+    --info-color: #4CAF50;
+    --info-dark: #388E3C;
+    --bg-gradient-start: #07C160;
+    --bg-gradient-end: #4CAF50;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --hover-bg: #A5D6A7;
     --card-bg: #FFFFFF;
-    --header-bg: #43A047;
+    --header-bg: #07C160;
     --header-text: #FFFFFF;
-    --sidebar-bg: #F5F5F5;
-    --table-header-bg: #E8F5E9;
-    --btn-hover: #2E7D32;
+    --sidebar-bg: #F9FAFB;
+    --table-header-bg: #A5D6A7;
+    --btn-hover: #059669;
+}
+
+/* 主题 4 - 樱花粉 */
+[data-theme="pink"] {
+    --primary-color: #FB7299;
+    --primary-dark: #F06292;
+    --primary-light: #F48FB1;
+    --secondary-color: #F8BBD9;
+    --success-color: #4CAF50;
+    --success-dark: #388E3C;
+    --danger-color: #EC407A;
+    --danger-dark: #D81B60;
+    --warning-color: #FFB74D;
+    --warning-dark: #FFA726;
+    --info-color: #F06292;
+    --info-dark: #E91E63;
+    --bg-gradient-start: #FB7299;
+    --bg-gradient-end: #F06292;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --hover-bg: #FCE4EC;
+    --card-bg: #FFFFFF;
+    --header-bg: #FB7299;
+    --header-text: #FFFFFF;
+    --sidebar-bg: #FDF2F8;
+    --table-header-bg: #FCE4EC;
+    --btn-hover: #E91E63;
+}
+
+/* 主题 5 - 科技青 */
+[data-theme="cyan"] {
+    --primary-color: #083344;
+    --primary-dark: #155E75;
+    --primary-light: #0891B2;
+    --secondary-color: #0EA5E9;
+    --success-color: #10B981;
+    --success-dark: #059669;
+    --danger-color: #EF4444;
+    --danger-dark: #DC2626;
+    --warning-color: #F59E0B;
+    --warning-dark: #D97706;
+    --info-color: #0EA5E9;
+    --info-dark: #0284C7;
+    --bg-gradient-start: #083344;
+    --bg-gradient-end: #155E75;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --hover-bg: #38BDF8;
+    --card-bg: #FFFFFF;
+    --header-bg: #083344;
+    --header-text: #FFFFFF;
+    --sidebar-bg: #F0F9FF;
+    --table-header-bg: #38BDF8;
+    --btn-hover: #164E63;
+}
+
+/* 主题 6 - 复古棕 */
+[data-theme="brown"] {
+    --primary-color: #8B4513;
+    --primary-dark: #A0522D;
+    --primary-light: #D2691E;
+    --secondary-color: #F4A460;
+    --success-color: #4CAF50;
+    --success-dark: #388E3C;
+    --danger-color: #D2691E;
+    --danger-dark: #A0522D;
+    --warning-color: #FF9800;
+    --warning-dark: #F57C00;
+    --info-color: #A0522D;
+    --info-dark: #8B4513;
+    --bg-gradient-start: #8B4513;
+    --bg-gradient-end: #A0522D;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --hover-bg: #FFEFD5;
+    --card-bg: #FFFFFF;
+    --header-bg: #8B4513;
+    --header-text: #FFFFFF;
+    --sidebar-bg: #FFFBF5;
+    --table-header-bg: #FFEFD5;
+    --btn-hover: #6B3410;
 }

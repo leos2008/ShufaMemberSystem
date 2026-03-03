@@ -652,30 +652,40 @@
                     <label style="font-weight: 600; color: var(--text-secondary);">快速选择：</label>
                     <select id="theme-select" onchange="changeTheme(this.value)" style="padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; cursor: pointer;">
                         <option value="blue">💼 商务蓝</option>
-                        <option value="red">🚩 党政红</option>
-                        <option value="orange">🔥 活力橙</option>
+                        <option value="rose">🌹 玫瑰红</option>
                         <option value="green">🌿 清新绿</option>
+                        <option value="pink">🌸 樱花粉</option>
+                        <option value="cyan">💙 科技青</option>
+                        <option value="brown">🟤 复古棕</option>
                     </select>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <p style="margin-bottom: 15px; font-weight: 600; color: var(--text-secondary);">主题预览：</p>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
-                        <div class="theme-card" onclick="changeTheme('blue')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #1E88E5, #1565C0); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <div class="theme-card" onclick="changeTheme('blue')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #1E40AF, #3B82F6); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                             <div style="font-weight: 600; margin-bottom: 8px;">💼 商务蓝</div>
                             <div style="font-size: 12px; opacity: 0.9;">专业稳重 · 商务办公</div>
                         </div>
-                        <div class="theme-card" onclick="changeTheme('red')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #C62828, #B71C1C); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                            <div style="font-weight: 600; margin-bottom: 8px;">🚩 党政红</div>
-                            <div style="font-size: 12px; opacity: 0.9;">庄重严肃 · 党建政务</div>
+                        <div class="theme-card" onclick="changeTheme('rose')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #BE185D, #E11D48); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">🌹 玫瑰红</div>
+                            <div style="font-size: 12px; opacity: 0.9;">浪漫优雅 · 时尚精致</div>
                         </div>
-                        <div class="theme-card" onclick="changeTheme('orange')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #F44336, #D32F2F); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                            <div style="font-weight: 600; margin-bottom: 8px;">🔥 活力橙</div>
-                            <div style="font-size: 12px; opacity: 0.9;">热情活力 · 年轻动感</div>
-                        </div>
-                        <div class="theme-card" onclick="changeTheme('green')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #43A047, #2E7D32); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <div class="theme-card" onclick="changeTheme('green')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #07C160, #4CAF50); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                             <div style="font-weight: 600; margin-bottom: 8px;">🌿 清新绿</div>
                             <div style="font-size: 12px; opacity: 0.9;">清新自然 · 舒适护眼</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('pink')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #FB7299, #F06292); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">🌸 樱花粉</div>
+                            <div style="font-size: 12px; opacity: 0.9;">甜美可爱 · 温馨浪漫</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('cyan')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #083344, #155E75); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">💙 科技青</div>
+                            <div style="font-size: 12px; opacity: 0.9;">科技时尚 · 理性专业</div>
+                        </div>
+                        <div class="theme-card" onclick="changeTheme('brown')" style="cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 15px; transition: all 0.3s; background: linear-gradient(135deg, #8B4513, #A0522D); color: white;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="font-weight: 600; margin-bottom: 8px;">🟤 复古棕</div>
+                            <div style="font-size: 12px; opacity: 0.9;">复古优雅 · 怀旧经典</div>
                         </div>
                     </div>
                 </div>
