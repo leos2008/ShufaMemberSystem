@@ -62,25 +62,31 @@ function loadData() {
         if (savedData) {
             data = JSON.parse(savedData);
             
-            // 为现有充值记录自动生成充值序号
+            // 为现有充值记录自动生成充值序号（全局唯一）
             if (data.recharges && data.recharges.length > 0) {
-                const students = [...new Set(data.recharges.map(r => r.studentName))];
                 let hasNewSeq = false;
-                students.forEach(studentName => {
-                    const studentRecharges = data.recharges
-                        .filter(r => r.studentName === studentName)
-                        .sort((a, b) => {
-                            const dateStrA = a.date + ' ' + (a.time || '00:00:00');
-                            const dateStrB = b.date + ' ' + (b.time || '00:00:00');
-                            return new Date(dateStrA) - new Date(dateStrB);
-                        });
-                    
-                    studentRecharges.forEach((r, index) => {
-                        if (!r.rechargeSeq) {
-                            r.rechargeSeq = 'CZ-' + String(index + 1).padStart(3, '0');
-                            hasNewSeq = true;
-                        }
-                    });
+                
+                // 先按日期排序所有充值记录
+                const sortedRecharges = [...data.recharges].sort((a, b) => {
+                    const dateStrA = a.date + ' ' + (a.time || '00:00:00');
+                    const dateStrB = b.date + ' ' + (b.time || '00:00:00');
+                    return new Date(dateStrA) - new Date(dateStrB);
+                });
+                
+                // 获取当前最大序号
+                let maxSeq = data.recharges
+                    .map(r => {
+                        const match = r.rechargeSeq?.match(/CZ-(\d+)/);
+                        return match ? parseInt(match[1]) : 0;
+                    })
+                    .reduce((max, curr) => Math.max(max, curr), 0);
+                
+                sortedRecharges.forEach(r => {
+                    if (!r.rechargeSeq) {
+                        maxSeq++;
+                        r.rechargeSeq = 'CZ-' + String(maxSeq).padStart(3, '0');
+                        hasNewSeq = true;
+                    }
                 });
                 
                 // 如果生成了新序号，保存数据
@@ -691,11 +697,10 @@ function addRecharge() {
     }
     
     const now = new Date();
-    // 生成充值序号 CZ-***
-    const existingRecharges = data.recharges.filter(r => r.studentName === studentName);
+    // 生成充值序号 CZ-*** (全局唯一)
     let rechargeSeq = '001';
-    if (existingRecharges.length > 0) {
-        const maxSeq = existingRecharges
+    if (data.recharges.length > 0) {
+        const maxSeq = data.recharges
             .map(r => {
                 const match = r.rechargeSeq?.match(/CZ-(\d+)/);
                 return match ? parseInt(match[1]) : 0;
@@ -944,6 +949,15 @@ function editRecharge(id) {
     if (!studentName || !packageName || !count || count <= 0 || !packageAmount || !totalAmount) {
         showNotification('请填写完整的续费信息', 'error');
         return;
+    }
+    
+    // 检查充值序号是否与其他记录重复
+    if (rechargeSeq) {
+        const duplicate = data.recharges.find(r => r.id !== id && r.rechargeSeq === rechargeSeq);
+        if (duplicate) {
+            showNotification('充值序号已存在，请使用其他序号', 'error');
+            return;
+        }
     }
     
     const recharge = data.recharges.find(r => r.id === id);
