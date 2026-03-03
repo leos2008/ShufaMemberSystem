@@ -1,16 +1,154 @@
 /* ====================================
-   基础样式变量 - Bootstrap 5 主题
+   方案 1：CSS 变量主题切换
+   使用方法：在 body 标签上设置 data-theme 属性
    ==================================== */
 
+/* 默认主题 - 紫色梦幻 */
 :root {
-    --primary-color: #0d6efd;
-    --primary-dark: #0a58ca;
-    --text-primary: #212529;
-    --text-secondary: #6c757d;
-    --border-color: #dee2e6;
-    --hover-bg: #e9ecef;
-    --success-color: #198754;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
-    --info-color: #0dcaf0;
+    --primary-color: #667eea;
+    --primary-dark: #5568d3;
+    --secondary-color: #764ba2;
+    --success-color: #48bb78;
+    --success-dark: #38a169;
+    --danger-color: #f56565;
+    --danger-dark: #e53e3e;
+    --warning-color: #ed8936;
+    --warning-dark: #dd6b20;
+    --info-color: #4299e1;
+    --info-dark: #3182ce;
+    --bg-gradient-start: #667eea;
+    --bg-gradient-end: #764ba2;
+    --text-primary: #333;
+    --text-secondary: #4a5568;
+    --border-color: #e2e8f0;
+    --hover-bg: #f7fafc;
 }
+
+/* 主题 2：蓝色海洋 */
+[data-theme="blue"] {
+    --primary-color: #3182ce;
+    --primary-dark: #2c5282;
+    --secondary-color: #2b6cb0;
+    --success-color: #38a169;
+    --success-dark: #2f855a;
+    --danger-color: #e53e3e;
+    --danger-dark: #c53030;
+    --warning-color: #dd6b20;
+    --warning-dark: #c05621;
+    --info-color: #3182ce;
+    --info-dark: #2c5282;
+    --bg-gradient-start: #667eea;
+    --bg-gradient-end: #764ba2;
+    --text-primary: #333;
+    --text-secondary: #4a5568;
+    --border-color: #e2e8f0;
+    --hover-bg: #f7fafc;
+}
+
+/* 主题 3：绿色自然 */
+[data-theme="green"] {
+    --primary-color: #38a169;
+    --primary-dark: #2f855a;
+    --secondary-color: #48bb78;
+    --success-color: #48bb78;
+    --success-dark: #38a169;
+    --danger-color: #e53e3e;
+    --danger-dark: #c53030;
+    --warning-color: #dd6b20;
+    --warning-dark: #c05621;
+    --info-color: #3182ce;
+    --info-dark: #2c5282;
+    --bg-gradient-start: #56ab2f;
+    --bg-gradient-end: #a8e063;
+    --text-primary: #333;
+    --text-secondary: #4a5568;
+    --border-color: #e2e8f0;
+    --hover-bg: #f7fafc;
+}
+
+/* 主题 4：橙色活力 */
+[data-theme="orange"] {
+    --primary-color: #dd6b20;
+    --primary-dark: #c05621;
+    --secondary-color: #ed8936;
+    --success-color: #48bb78;
+    --success-dark: #38a169;
+    --danger-color: #f56565;
+    --danger-dark: #e53e3e;
+    --warning-color: #ed8936;
+    --warning-dark: #dd6b20;
+    --info-color: #4299e1;
+    --info-dark: #3182ce;
+    --bg-gradient-start: #f093fb;
+    --bg-gradient-end: #f5576c;
+    --text-primary: #333;
+    --text-secondary: #4a5568;
+    --border-color: #e2e8f0;
+    --hover-bg: #f7fafc;
+}
+
+/* 主题 5：深色模式 */
+[data-theme="dark"] {
+    --primary-color: #63b3ed;
+    --primary-dark: #4299e1;
+    --secondary-color: #b794f4;
+    --success-color: #68d391;
+    --success-dark: #48bb78;
+    --danger-color: #fc8181;
+    --danger-dark: #f56565;
+    --warning-color: #f6ad55;
+    --warning-dark: #ed8936;
+    --info-color: #63b3ed;
+    --info-dark: #4299e1;
+    --bg-gradient-start: #2d3748;
+    --bg-gradient-end: #1a202c;
+    --text-primary: #f7fafc;
+    --text-secondary: #e2e8f0;
+    --border-color: #4a5568;
+    --hover-bg: #2d3748;
+}
+
+/* 主题 6：粉色浪漫 */
+[data-theme="pink"] {
+    --primary-color: #d53f8c;
+    --primary-dark: #b83280;
+    --secondary-color: #ed64a6;
+    --success-color: #48bb78;
+    --success-dark: #38a169;
+    --danger-color: #f56565;
+    --danger-dark: #e53e3e;
+    --warning-color: #ed8936;
+    --warning-dark: #dd6b20;
+    --info-color: #4299e1;
+    --info-dark: #3182ce;
+    --bg-gradient-start: #ff9a9e;
+    --bg-gradient-end: #fecfef;
+    --text-primary: #333;
+    --text-secondary: #4a5568;
+    --border-color: #e2e8f0;
+    --hover-bg: #f7fafc;
+}
+
+/* ====================================
+   方案 2：多套独立 CSS 文件切换
+   使用方法：动态替换 link 标签的 href
+   ==================================== */
+/* 这个方案需要创建多个 CSS 文件：
+   - theme-purple.css (默认)
+   - theme-blue.css
+   - theme-green.css
+   - theme-orange.css
+   - theme-dark.css
+   - theme-pink.css
+*/
+
+/* ====================================
+   方案 3：CSS 类名前缀切换
+   使用方法：在 body 标签上添加主题类名
+   ==================================== */
+/* 
+   .theme-purple body { ... }
+   .theme-blue body { ... }
+   .theme-green body { ... }
+   等...
+*/
