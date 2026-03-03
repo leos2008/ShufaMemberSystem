@@ -1301,7 +1301,7 @@ function renderAttendance() {
                    recordDate.getMonth() + 1 === currentMonth;
         });
         
-        // 获取最近 4 个月的考勤数据
+        // 获取最近 4 个月的考勤数据（相对于当前月份）
         const last4Months = [];
         for (let i = 1; i <= 4; i++) {
             let month = currentMonth - i;
@@ -1407,6 +1407,29 @@ function filterAttendance() {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
     
+    // 确定要筛选的月份
+    let filterYear = currentYear;
+    let filterMonth = currentMonth;
+    if (monthStr) {
+        [filterYear, filterMonth] = monthStr.split('-').map(Number);
+    }
+    
+    // 更新顶部统计卡片
+    const filterMonthRecords = data.attendance.filter(a => {
+        const recordDate = new Date(a.date);
+        return recordDate.getFullYear() === filterYear && 
+               recordDate.getMonth() + 1 === filterMonth;
+    });
+    
+    const filterClassStudents = className ? data.students.filter(s => s.className === className) : data.students;
+    const filterNamesStudents = nameKeyword ? filterClassStudents.filter(s => s.name.toLowerCase().includes(nameKeyword)) : filterClassStudents;
+    const attendedStudentsSet = new Set(filterMonthRecords.map(r => r.studentName));
+    const attendedStudents = filterNamesStudents.filter(s => attendedStudentsSet.has(s.name));
+    
+    document.getElementById('total-attendance-count').textContent = filterMonthRecords.length;
+    document.getElementById('attended-student-count').textContent = attendedStudents.length;
+    document.getElementById('total-student-count').textContent = filterNamesStudents.length;
+    
     const filteredStudents = data.students.filter(s => {
         const matchClass = !className || s.className === className;
         const matchName = !nameKeyword || s.name.toLowerCase().includes(nameKeyword);
@@ -1423,12 +1446,11 @@ function filterAttendance() {
         
         // 如果选择了月份，按选择的月份筛选
         if (monthStr) {
-            const [year, month] = monthStr.split('-').map(Number);
             currentMonthRecords = data.attendance.filter(a => {
                 const recordDate = new Date(a.date);
                 return a.studentName === student.name && 
-                       recordDate.getFullYear() === year && 
-                       recordDate.getMonth() + 1 === month;
+                       recordDate.getFullYear() === filterYear && 
+                       recordDate.getMonth() + 1 === filterMonth;
             });
         }
         
